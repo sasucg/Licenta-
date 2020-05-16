@@ -1,7 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="91dbbf53-bfda-4a38-b969-b0eb10d70719" name="Default Changelist" comment="" />
+    <list default="true" id="91dbbf53-bfda-4a38-b969-b0eb10d70719" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/freeTime.py" beforeDir="false" afterPath="$PROJECT_DIR$/freeTime.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/users.db" beforeDir="false" afterPath="$PROJECT_DIR$/users.db" afterDir="false" />
+    </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -13,17 +17,15 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/freeTime.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="68">
-              <caret line="222" column="14" lean-forward="true" selection-start-line="222" selection-start-column="14" selection-end-line="222" selection-end-column="14" />
+            <state relative-caret-position="459">
+              <caret line="261" column="110" lean-forward="true" selection-start-line="261" selection-start-column="110" selection-end-line="261" selection-end-column="110" />
               <folding>
                 <element signature="e#0#21#0" expanded="true" />
-                <element signature="e#822#1166#0" />
-                <element signature="e#1191#1568#0" />
-                <element signature="e#1594#1765#0" />
-                <element signature="e#1806#3960#0" />
-                <element signature="e#4678#4949#0" />
-                <element signature="e#4992#5414#0" />
-                <element signature="e#12097#13419#0" />
+                <element signature="e#5086#5529#0" />
+                <element signature="e#7385#7506#0" />
+                <element signature="e#7532#7637#0" />
+                <element signature="e#9878#15045#0" />
+                <element signature="e#12458#13780#0" />
               </folding>
             </state>
           </provider>
@@ -64,7 +66,7 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/databasecommands.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-102">
+            <state>
               <folding>
                 <element signature="e#0#21#0" expanded="true" />
               </folding>
@@ -96,22 +98,13 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/CRUDdb.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-816">
+            <state relative-caret-position="17">
               <caret line="126" column="31" selection-start-line="126" selection-start-column="31" selection-end-line="126" selection-end-column="31" />
               <folding>
                 <element signature="e#0#21#0" expanded="true" />
                 <element signature="e#488#661#0" />
                 <element signature="e#736#1516#0" />
               </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/FrameandRadiobuttons.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="153">
-              <caret line="10" column="14" selection-start-line="10" selection-start-column="14" selection-end-line="10" selection-end-column="14" />
             </state>
           </provider>
         </entry>
@@ -133,6 +126,7 @@
       <find>fetch</find>
       <find>=&quot;+</find>
       <find>logged_label</find>
+      <find>logged_name</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -155,8 +149,8 @@
     </option>
   </component>
   <component name="ProjectFrameBounds" extendedState="6">
-    <option name="x" value="-43" />
-    <option name="y" value="21" />
+    <option name="x" value="1040" />
+    <option name="y" value="55" />
     <option name="width" value="842" />
     <option name="height" value="1010" />
   </component>
@@ -345,6 +339,15 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/databasecommands.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state>
+          <folding>
+            <element signature="e#0#21#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/MessageBox.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="272">
@@ -369,18 +372,9 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/databasecommands.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-102">
-          <folding>
-            <element signature="e#0#21#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/CRUDdb.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-816">
+        <state relative-caret-position="17">
           <caret line="126" column="31" selection-start-line="126" selection-start-column="31" selection-end-line="126" selection-end-column="31" />
           <folding>
             <element signature="e#0#21#0" expanded="true" />
@@ -392,17 +386,15 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/freeTime.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="68">
-          <caret line="222" column="14" lean-forward="true" selection-start-line="222" selection-start-column="14" selection-end-line="222" selection-end-column="14" />
+        <state relative-caret-position="459">
+          <caret line="261" column="110" lean-forward="true" selection-start-line="261" selection-start-column="110" selection-end-line="261" selection-end-column="110" />
           <folding>
             <element signature="e#0#21#0" expanded="true" />
-            <element signature="e#822#1166#0" />
-            <element signature="e#1191#1568#0" />
-            <element signature="e#1594#1765#0" />
-            <element signature="e#1806#3960#0" />
-            <element signature="e#4678#4949#0" />
-            <element signature="e#4992#5414#0" />
-            <element signature="e#12097#13419#0" />
+            <element signature="e#5086#5529#0" />
+            <element signature="e#7385#7506#0" />
+            <element signature="e#7532#7637#0" />
+            <element signature="e#9878#15045#0" />
+            <element signature="e#12458#13780#0" />
           </folding>
         </state>
       </provider>

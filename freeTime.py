@@ -1,6 +1,8 @@
 from tkinter import *
+from datetime import date
 import sqlite3
 from tkinter import messagebox, ttk
+import operator
 import tkinter.font as tkFont
 from PIL import ImageTk, Image
 from tkinter import filedialog
@@ -145,26 +147,142 @@ def logout_function():
         return
 
 
-# Functia furnizeaza first name-ul userului logat
-def querry_first_name(logged_user):
+# Functia furnizeaza first name-ul si original id-ul userului logat
+def querry_data_logged_user(logged_user):
     conn = sqlite3.connect('users.db')
     cursor = conn.cursor()
 
-    sql_query = """select first_name from users where username = ?"""
+    sql_query = """SELECT oid, first_name, year, specialization FROM users WHERE username = ?"""
     cursor.execute(sql_query, (logged_user,))
     user_database = cursor.fetchone()
 
     conn.commit()
     conn.close()
 
-    return user_database[0]
+    return user_database[0], user_database[1], user_database[2], user_database[3]
+
+
+#Functia furnizeaza semestrul actual
+def get_current_semester():
+    today = date.today()
+    today_format = today.strftime("%m/%d/%y")
+    today_month = str(today_format[0] + today_format[1])
+    today_day = str(today_format[3] + today_format[4])
+
+    current_semester = 0
+    if int(today_month) >= 10 or int(today_month) < 2:
+        current_semester = 1
+    if int(today_month) > 2 and int(today_month) < 6:
+        current_semester = 2
+    if int(today_month) == 2:
+        if int(today_day) < 15:
+            current_semester = 1
+        else:
+            current_semester = 2
+
+    return current_semester
+
+
+# Functia cauta in baza de date materiile corespunzatoare: specializarii userului, anul si semestrul
+def querry_courses(year, semester):
+    conn = sqlite3.connect('materii.db')
+    cursor = conn.cursor()
+
+    sql_query = """SELECT nume FROM materii WHERE specializare = ? AND an = ? and semestru = ?"""
+    cursor.execute(sql_query, (logged_specialization, year, semester))
+    courses_database = cursor.fetchall()
+
+    conn.commit()
+    conn.close()
+    return courses_database
+
+
+# Functia apeleaza functia care furnizeaza materiile curente si le afiseaza
+# TO BE DESIGNED000003
+def querry_current_courses():
+    courses_window = Toplevel()
+    courses_window.title("Materii")
+    courses_window.geometry("450x500")
+
+    current_semester = get_current_semester()
+
+    courses_database = querry_courses(logged_year, current_semester)
+
+    if current_semester == 0:
+        print("Vacanta de vara! Vacanta placuta")
+    else:
+        hi_courses = Label(courses_window, text="Materiile pentru care trebuie sa te pregatesti sunt cele din: /t Anul "+logged_year+", semestrul "+str(current_semester))
+        hi_courses.pack()
+        for course in courses_database:
+            course_label = Label(courses_window, text=course[0])
+            course_label.pack()
+
+
+# Functia e folosita in querry_grades pentru putea itera prin ani si sa putem afisa notele din anii trecuti
+def get_current_year_as_int():
+    if logged_year == "III": return 3
+    if logged_year == "II": return 2
+    if logged_year == "I": return 1
+
+
+# Functia e folosita in querry_grades pentru a ne permite sa apelan querry_courses dupa an(string) / semestru
+def get_year_as_string(int_year):
+    if int_year == 1: return "I"
+    if int_year == 2: return "II"
+    if int_year == 3: return "III"
+
+# Functia furnizeaza notele obtinute la fiecare materie pana in prezent
+def querry_grades():
+    grades_window = Toplevel()
+    grades_window.title("Carnet de note")
+    grades_window.geometry("450x800")
+
+    # gresit as fuck
+    # current_semester = 1
+    # print(current_semester)
+    # current_year = get_current_year_as_int()
+    # print(current_year)
+    # int_post_year = 1
+    # int_post_semester = 1
+    # while int_post_year != current_year or int_post_semester != current_semester:
+    #     print(int_post_year, int_post_semester)
+    #     post_year = get_year_as_string(int_post_year)
+    #     info_label = Label(grades_window, text="Anul "+str(post_year)+" semestrul "+str(int_post_semester))
+    #     info_label.pack()
+    #     courses = querry_courses(post_year, int_post_semester)
+    #
+    #     for course in courses:
+    #         course_label_grades = Label(grades_window, text=course[0])
+    #         course_label_grades.pack()
+    #
+    #     int_post_semester += 1
+    #     if int_post_semester == 3:
+    #         int_post_year += 1
+    #         int_post_semester = 1
+    #
+    # if (int_post_year == 3 and int_post_semester == 2) or (int_post_year == 2 and int_post_semester == 2) or (int_post_year == 1 and int_post_semester == 2):
+    #     print(int_post_year, int_post_semester)
+    #     post_year = get_year_as_string(int_post_year)
+    #     info_label = Label(grades_window, text="Anul " + str(post_year) + " semestrul " + str(int_post_semester))
+    #     info_label.pack()
+    #     courses = querry_courses(post_year, int_post_semester)
+    #
+    #     for course in courses:
+    #         course_label_grades = Label(grades_window, text=course[0])
+    #         course_label_grades.pack()
+
 
 def logged_in_function():
     global logged_in_frame
     logged_in_frame = LabelFrame(root, bg="white",  width=1000, height=700, bd=0, padx=60, pady=30)
     logged_in_frame.place(relx=.15, rely=.1)
     logged_user = username_login_input.get()
-    logged_name = querry_first_name(logged_user)
+    global logged_original_id
+    global logged_name
+    global logged_year
+    global logged_specialization
+    (logged_original_id, logged_name, logged_year, logged_specialization) = querry_data_logged_user(logged_user)
+
 
     #Pentru a manipula Welcome label text si logout button, schimb valorile din padx din gridurile lor
     top_bar_frame = LabelFrame(logged_in_frame, width=850, height=100, bg="white")
@@ -179,7 +297,7 @@ def logged_in_function():
 
     profile_button_menu = Button(menu_frame, text="Profil", pady=83, padx=110, bd=0)
     profile_button_menu.grid(row=0, column=0 , sticky="ew")
-    courses_button_menu = Button(menu_frame, text="Materii", pady=83, padx=110, bd=0)
+    courses_button_menu = Button(menu_frame, text="Materii", pady=83, padx=110, bd=0, command=querry_current_courses)
     courses_button_menu.grid(row=0, column=1, sticky="ew", padx=10)
     timetable_button_menu = Button(menu_frame, text="Orar", pady=83, padx=110, bd=0)
     timetable_button_menu.grid(row=0, column=2, sticky="ew")
@@ -189,7 +307,7 @@ def logged_in_function():
     schedule_button_menu.grid(row=1, column=1, sticky="ew", padx=10, pady=10)
     session_schedule_button_menu = Button(menu_frame, text="Schedule Sesiune", pady=83, padx=90, bd=0)
     session_schedule_button_menu.grid(row=1, column=2, sticky="ew", pady=10)
-    carnet_button_menu = Button(menu_frame, text="Carnet", pady=83, padx=110, bd=0)
+    carnet_button_menu = Button(menu_frame, text="Carnet", pady=83, padx=110, bd=0, command=querry_grades)
     carnet_button_menu.grid(row=2, column=0 , sticky="ew")
     calendar_button_menu = Button(menu_frame, text="Calendar", pady=83, padx=110, bd=0)
     calendar_button_menu.grid(row=2, column=1, sticky="ew", padx=10)
@@ -198,6 +316,7 @@ def logged_in_function():
 
 
 
+# Nu vreau mai multe ferestre din register pe ecran TO BE DONE
 def register_window_show():
     #Fereastra reg este globala pentru a putea fi distrusa in momentul in care un user s a inregistrat
     global reg
@@ -210,9 +329,7 @@ def register_window_show():
 
     #Listele pentru Dropdowns
     study_programs = [
-        "Licenta",
-        "Master",
-        "Doctorat"
+        "Licenta"
     ]
     study_profiles = [
         "Informatica",
@@ -224,7 +341,7 @@ def register_window_show():
         "CTI",
         "Matematica",
         "Mate-Info",
-        "Mate Aplciata"
+        "Mate-Aplicata"
     ]
     study_schoolarships = [
         "ID",
@@ -309,7 +426,6 @@ def register_window_show():
     submit_button_register.grid(row=10, column=0, columnspan=2, pady=10, ipadx=125)
 
 
-
 def login_frame_show():
     global login_frame
     login_frame = LabelFrame(root, padx=30, pady=80)
@@ -333,6 +449,7 @@ def login_frame_show():
     password_login_input.grid(row=2, column=1)
 
     # Buttons pentru Login
+    global register_button_login
     log_button_login = Button(login_frame, text="Logare", command=login_function)
     log_button_login.grid(row=3, column=0, columnspan=2, ipadx=115, pady=5)
     register_button_login = Button(login_frame, text="Inregistrare", command=register_window_show)
