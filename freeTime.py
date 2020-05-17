@@ -224,6 +224,10 @@ def get_current_year_as_int():
     if logged_year == "II": return 2
     if logged_year == "I": return 1
 
+def get_year_as_int(string_year):
+    if string_year == "III": return 3
+    if string_year == "II": return 2
+    if string_year == "I": return 1
 
 # Functia e folosita in querry_grades pentru a ne permite sa apelan querry_courses dupa an(string) / semestru
 def get_year_as_string(int_year):
@@ -231,45 +235,107 @@ def get_year_as_string(int_year):
     if int_year == 2: return "II"
     if int_year == 3: return "III"
 
+
+# Functia intoarce 'semesters to show' semestre incepand din semestrul 1 anul 1
+def get_past_courses(semesters_to_show):
+    shown_semester = 1
+    cursor_semester = 1
+    cursor_year = 1
+    courses_done = []
+
+    while shown_semester != semesters_to_show + 1:
+        cursor_year_string = get_year_as_string(cursor_year)
+        courses = querry_courses(cursor_year_string, cursor_semester)
+
+        for course in courses:
+            courses_done.append(course[0])
+
+        cursor_semester += 1
+        if cursor_semester == 3:
+            cursor_year += 1
+            cursor_semester = 1
+        shown_semester += 1
+
+    return courses_done
+
+# Functia furnizeaza un vector de note care corespunde vectorului user past courses
+def get_grades_from_database(user_past_courses):
+    conn = sqlite3.connect('note.db')
+    cursor = conn.cursor()
+    grades = []
+
+    for i in range(len(user_past_courses)):
+        sql_query = """SELECT nota FROM note WHERE id_user = ? AND nume_materie = ?"""
+        cursor.execute(sql_query, (logged_original_id, user_past_courses[i]))
+        grade_database = cursor.fetchone()
+        grades.append(grade_database)
+
+    conn.commit()
+    conn.close()
+    return grades
+
+
+def commit_grades_database(course_dropdowns, user_past_courses):
+    conn = sqlite3.connect('note.db')
+    cursor = conn.cursor()
+    commited_user_grades = []
+
+    for i in range(0, len(user_past_courses)):
+        commited_user_grades.append(course_dropdowns[i].get())
+
+    for i in range(len(user_past_courses)):
+        if commited_user_grades[i] != "-":
+            sql = """INSERT INTO note(id_user, nume_materie, nota) VALUES(?, ?, ?)"""
+            com =  logged_original_id, user_past_courses[i], commited_user_grades[i]
+            cursor.execute(sql, com)
+
+    conn.commit()
+    conn.close()
+
+    response = messagebox.showinfo("Saved!", "Modificarile au fost salvate!")
+    if response == "ok":
+        grades_window.destroy()
+
+
 # Functia furnizeaza notele obtinute la fiecare materie pana in prezent
-def querry_grades():
+def report_card():
+    global grades_window
     grades_window = Toplevel()
     grades_window.title("Carnet de note")
     grades_window.geometry("450x800")
 
-    # gresit as fuck
-    # current_semester = 1
-    # print(current_semester)
-    # current_year = get_current_year_as_int()
-    # print(current_year)
-    # int_post_year = 1
-    # int_post_semester = 1
-    # while int_post_year != current_year or int_post_semester != current_semester:
-    #     print(int_post_year, int_post_semester)
-    #     post_year = get_year_as_string(int_post_year)
-    #     info_label = Label(grades_window, text="Anul "+str(post_year)+" semestrul "+str(int_post_semester))
-    #     info_label.pack()
-    #     courses = querry_courses(post_year, int_post_semester)
-    #
-    #     for course in courses:
-    #         course_label_grades = Label(grades_window, text=course[0])
-    #         course_label_grades.pack()
-    #
-    #     int_post_semester += 1
-    #     if int_post_semester == 3:
-    #         int_post_year += 1
-    #         int_post_semester = 1
-    #
-    # if (int_post_year == 3 and int_post_semester == 2) or (int_post_year == 2 and int_post_semester == 2) or (int_post_year == 1 and int_post_semester == 2):
-    #     print(int_post_year, int_post_semester)
-    #     post_year = get_year_as_string(int_post_year)
-    #     info_label = Label(grades_window, text="Anul " + str(post_year) + " semestrul " + str(int_post_semester))
-    #     info_label.pack()
-    #     courses = querry_courses(post_year, int_post_semester)
-    #
-    #     for course in courses:
-    #         course_label_grades = Label(grades_window, text=course[0])
-    #         course_label_grades.pack()
+    current_semester = get_current_semester() # Aflam semestrul in care suntem
+    current_year = get_current_year_as_int() # Luam anul in care suntem ca int
+
+    # Aflam cate semestre trebuie sa postam
+    if current_semester == 2:
+        semesters_to_show = current_year * current_semester
+    else:
+        semesters_to_show = current_year * 2 - 1
+
+    user_past_courses = get_past_courses(semesters_to_show) # Luam toate cursurile din trecut + cele din prezent
+    user_grades = get_grades_from_database(user_past_courses) # Luam notele la notele din trecut + cele din prezent unele vor fi None
+
+    note = ["-", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10"]
+    course_dropdowns = [] # Vectorul in care tinem casutele de tip dropdown si valorile acestora. Casutele corespund materiei i din vecctorul user_past_courses
+
+    linie = 0 # Linia ne ajuta la postarea elementelor in fereastra
+    for i in range(0, len(user_past_courses)):  # Pentru fiecare curs, il postam in stanga si nota acestuia in dreapta
+        course_text_label = Label(grades_window, text=user_past_courses[i])
+        course_text_label.grid(row=linie, column=0)
+
+        course_dropdown = ttk.Combobox(grades_window, value=note)
+        if  user_grades[i] == None:
+            course_dropdown.current(0)
+        else:
+            course_dropdown.current(user_grades[i][0])
+        course_dropdown.grid(row=linie, column=1)
+        course_dropdowns.append(course_dropdown)
+        linie += 1
+
+    save_changes = Button(grades_window, text="Salveaza", command=lambda: commit_grades_database(course_dropdowns, user_past_courses))
+    save_changes.grid(row=linie+1, column=0)
+
 
 
 def logged_in_function():
@@ -282,7 +348,6 @@ def logged_in_function():
     global logged_year
     global logged_specialization
     (logged_original_id, logged_name, logged_year, logged_specialization) = querry_data_logged_user(logged_user)
-
 
     #Pentru a manipula Welcome label text si logout button, schimb valorile din padx din gridurile lor
     top_bar_frame = LabelFrame(logged_in_frame, width=850, height=100, bg="white")
@@ -307,7 +372,7 @@ def logged_in_function():
     schedule_button_menu.grid(row=1, column=1, sticky="ew", padx=10, pady=10)
     session_schedule_button_menu = Button(menu_frame, text="Schedule Sesiune", pady=83, padx=90, bd=0)
     session_schedule_button_menu.grid(row=1, column=2, sticky="ew", pady=10)
-    carnet_button_menu = Button(menu_frame, text="Carnet", pady=83, padx=110, bd=0, command=querry_grades)
+    carnet_button_menu = Button(menu_frame, text="Carnet", pady=83, padx=110, bd=0, command=report_card)
     carnet_button_menu.grid(row=2, column=0 , sticky="ew")
     calendar_button_menu = Button(menu_frame, text="Calendar", pady=83, padx=110, bd=0)
     calendar_button_menu.grid(row=2, column=1, sticky="ew", padx=10)
