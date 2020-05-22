@@ -2,12 +2,9 @@ from tkinter import *
 from datetime import date
 import sqlite3
 from tkinter import messagebox, ttk
-import operator
-import tkinter.font as tkFont
+
 from PIL import ImageTk, Image
-from tkinter import filedialog
-import requests
-import json
+
 
 root = Tk()
 root.title("Schedule App")
@@ -285,9 +282,12 @@ def commit_grades_database(course_dropdowns, user_past_courses):
 
     for i in range(len(user_past_courses)):
         if commited_user_grades[i] != "-":
-            sql = """INSERT INTO note(id_user, nume_materie, nota) VALUES(?, ?, ?)"""
-            com =  logged_original_id, user_past_courses[i], commited_user_grades[i]
-            cursor.execute(sql, com)
+            sql_delete = "DELETE from note WHERE id_user=? and nume_materie=?"
+            com_delete = logged_original_id, user_past_courses[i]
+            cursor.execute(sql_delete, com_delete)
+            sql_insert = """INSERT INTO note(id_user, nume_materie, nota) VALUES(?, ?, ?)"""
+            com_insert =  logged_original_id, user_past_courses[i], commited_user_grades[i]
+            cursor.execute(sql_insert, com_insert)
 
     conn.commit()
     conn.close()
@@ -334,8 +334,50 @@ def report_card():
         linie += 1
 
     save_changes = Button(grades_window, text="Salveaza", command=lambda: commit_grades_database(course_dropdowns, user_past_courses))
-    save_changes.grid(row=linie+1, column=0)
+    save_changes.grid(row=linie+1, column=0, columnspan=2, pady=20)
 
+def clicked2_hobby(i):
+    hobby_images_buttons[i].config(width = 200, height= 150, command=lambda: clicked_hobby(i))
+    hobby_images_buttons[i].grid(padx=0, pady=0)
+
+def clicked_hobby(i):
+    hobby_images_buttons[i].config(width = 150, height= 100, command=lambda: clicked2_hobby(i))
+    hobby_images_buttons[i].grid(padx=25, pady=25)
+
+
+
+def users_hobbies():
+    global hobbies_window
+    hobbies_window = Toplevel()
+    hobbies_window.title("Ocupațiile mele")
+
+    global hobby_images_buttons
+    global hobby_images_list
+    hobby_images_list = []
+    hobby_images_buttons = []
+
+    for i in range(21):
+        image = Image.open("C:/Users/lenovo/PycharmProjects/LicentaSasu/images/"+str(i)+".jpg")
+        image = image.resize((200, 150), Image.ANTIALIAS)
+        hobby_img_to_post = ImageTk.PhotoImage(image)
+
+        hobby_images_buttons.append(i)
+        hobby_images_buttons[i] = Button(hobbies_window, image=hobby_img_to_post, command= lambda index=i: clicked_hobby(index))
+        hobby_images_buttons[i].image = (hobby_img_to_post)
+
+        hobby_images_list.append(hobby_img_to_post)
+
+    r = 0
+    c = 0
+    for but in hobby_images_buttons:
+        if c == 7:
+            r += 1
+            c = 0
+        but.grid(row=r, column=c)
+        c += 1
+
+    for img in hobby_images_list:
+        print(img)
 
 
 def logged_in_function():
@@ -366,11 +408,11 @@ def logged_in_function():
     courses_button_menu.grid(row=0, column=1, sticky="ew", padx=10)
     timetable_button_menu = Button(menu_frame, text="Orar", pady=83, padx=110, bd=0)
     timetable_button_menu.grid(row=0, column=2, sticky="ew")
-    hobbies_button_menu = Button(menu_frame, text="Hobbies", pady=83, padx=110, bd=0)
+    hobbies_button_menu = Button(menu_frame, text="Hobbies", pady=83, padx=110, bd=0, command=users_hobbies)
     hobbies_button_menu.grid(row=1, column=0, sticky="ew", pady=10)
-    schedule_button_menu = Button(menu_frame, text="Schedule", pady=83, padx=110, bd=0)
+    schedule_button_menu = Button(menu_frame, text="Programul meu", pady=83, padx=110, bd=0)
     schedule_button_menu.grid(row=1, column=1, sticky="ew", padx=10, pady=10)
-    session_schedule_button_menu = Button(menu_frame, text="Schedule Sesiune", pady=83, padx=90, bd=0)
+    session_schedule_button_menu = Button(menu_frame, text="Programul meu Sesiune", pady=83, padx=90, bd=0)
     session_schedule_button_menu.grid(row=1, column=2, sticky="ew", pady=10)
     carnet_button_menu = Button(menu_frame, text="Carnet", pady=83, padx=110, bd=0, command=report_card)
     carnet_button_menu.grid(row=2, column=0 , sticky="ew")
