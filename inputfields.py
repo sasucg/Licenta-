@@ -1,16 +1,17 @@
 from tkinter import *
 
 root = Tk()
+my_name_is = Label(root, text="Eu mă numesc: ")
+my_name_is.grid(row=0, column=0)
 e = Entry(root, width=50)
-e.pack()
+e.grid(row=0, column=1)
 
 def myClick():
-    hello = "Hello, " + e.get() + "!"
-    myLabel = Label(root, text = hello )
-    myLabel.pack()
+    myLabel = Label(root, text = "Salutare, " + e.get() + "! Ce faci?" )
+    myLabel.grid(row=2, column=0, columnspan=2)
 
-myButton = Button(root, text="Enter your name", command=myClick)
-myButton.pack()
+myButton = Button(root, text="Click!", command=myClick)
+myButton.grid(row=1, column=0, columnspan=2)
 
 root.mainloop()
 

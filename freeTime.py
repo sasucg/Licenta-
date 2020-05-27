@@ -2,8 +2,9 @@ from tkinter import *
 from datetime import date
 import sqlite3
 from tkinter import messagebox, ttk
-
 from PIL import ImageTk, Image
+import bcrypt
+from tkinter import filedialog
 
 
 root = Tk()
@@ -12,25 +13,9 @@ root.iconbitmap('C:/Users/lenovo/PycharmProjects/LicentaSasu/Icon.ico')
 root.geometry("1400x800")
 root.resizable(False, False)
 
-conn = sqlite3.connect('users.db')
-cursor = conn.cursor()
 
-# Tabela a fost deja creata folosind aceste instructiuni
-# cursor.execute("""CREATE TABLE users (
-#         first_name text,
-#         last_name text,
-#         username text,
-#         password text,
-#         email text,
-#         program text,
-#         profile text,
-#         specialization text,
-#         schoolarship text,
-#         year text
-#         )""")
-# #
-
-def allFieldsCompleted():
+# Functia verifica daca toate fieldurile din register card sunt completate
+def verify_fields_completed():
     fields_ok = 1
     if first_name_register_input.get() == "" or last_name_register_input.get() == "" or username_register_input.get() == "" or password_register_input.get() == "" or email_register_input.get() == "":
         response = messagebox.showerror("Eroare!", "Nu ati completat toate campurile!")
@@ -38,7 +23,8 @@ def allFieldsCompleted():
     return fields_ok
 
 
-def userExists():
+# Functia verifica daca un user se afla sau nu in baza de date
+def user_does_exists():
     conn = sqlite3.connect('users.db')
     cursor = conn.cursor()
     cursor.execute("SELECT * from users")
@@ -47,19 +33,23 @@ def userExists():
     for user_database in users_database:
         username_test = user_database[2]
         if username_test == username_register_input.get():
+            exists = "found"
             break
     conn.commit()
     conn.close()
     return exists
 
 
-def emailFormat():
+# Functia verifica daca emailul introdus in register window este valid pentru inregistrare
+def verify_email_format():
     email_format = "unknownformat"
     if '@' in email_register_input.get() and '.' in email_register_input.get():
         email_format = "emailformat"
     return email_format
 
 
+# Functia verifica daca toate datele introduse pentru inregistrare sunt valide si introduce datele in tabela users
+# si parolele criptate in tabela parole
 def register_database_function():
     conn = sqlite3.connect('users.db')
     cursor = conn.cursor()
@@ -70,7 +60,7 @@ def register_database_function():
     password_register_label.config(fg="black")
     email_register_label.config(fg="black")
 
-    if allFieldsCompleted() == 0:
+    if verify_fields_completed() == 0:
         if first_name_register_input.get() == "":
             first_name_register_label.config(fg="red")
         if last_name_register_input.get() == "":
@@ -81,63 +71,102 @@ def register_database_function():
             password_register_label.config(fg="red")
         if email_register_input.get() == "":
             email_register_label.config(fg="red")
-    elif userExists() != "missing":
-        reponse = messagebox.showerror("Error!", "Username deja folosit!")
-    elif emailFormat() == "emailformat":
-        cursor.execute("INSERT INTO users VALUES (:f_name, :l_name, :username, :password, :email, :program, :profile, :specialization, :school, :year)",
+    elif user_does_exists() != "missing":
+        messagebox.showerror("Error!", "Username deja folosit!")
+    elif profile_register_drop.get() == "CTI" and specialization_register_drop.get() != "CTI":
+        messagebox.showerror("Error!", "Domeniul CTI nu are aceasta specializare!")
+    elif profile_register_drop.get() == "Informatica" and specialization_register_drop.get() != "Informatica":
+        messagebox.showerror("Error!", "Domeniul Informatica nu are specializarea selectata!")
+    elif profile_register_drop.get() == "Informatica" and specialization_register_drop.get() == "Informatica" and year_register_drop.get() == "IV":
+        messagebox.showerror("Error!", "Domeniul Informatica nu are anul selectat!")
+    elif profile_register_drop.get() == "Matematica" and (specialization_register_drop.get() == "Informatica" or specialization_register_drop.get() == "CTI"):
+        messagebox.showerror("Error!", "Domeniul Matematica nu are specializarea selectata!")
+    elif profile_register_drop.get() == "Matematica" and (specialization_register_drop.get() == "Mate-Info" or specialization_register_drop.get() == "Mate-aplicata") and (year_register_drop.get() == "I" or year_register_drop.get() == "IV"):
+        messagebox.showerror("Error!", "Domeniul Matematica nu are aceasta specializare la anul selectat!")
+    elif profile_register_drop.get() == "Matematica" and specialization_register_drop.get() == "Matematica" and year_register_drop.get() == "IV":
+        messagebox.showerror("Error!", "Domeniul Matematica nu are anul selectat!")
+    elif verify_email_format() == "emailformat":
+        cursor.execute("INSERT INTO users VALUES (:f_name, :l_name, :username, :email, :data_inregistrare, :program, :domeniu, :specializare, :year, :path_pic)",
                        {
                            'f_name': first_name_register_input.get(),
                            'l_name': last_name_register_input.get(),
                            'username': username_register_input.get(),
-                           'password': password_register_input.get(),
                            'email': email_register_input.get(),
+                           'data_inregistrare': date.today(),
                            'program': program_register_drop.get(),
-                           'profile': profile_register_drop.get(),
-                           'specialization': specialization_register_drop.get(),
-                           'school': schoolship_register_drop.get(),
-                           'year': year_register_drop.get()
+                           'domeniu': profile_register_drop.get(),
+                           'specializare': specialization_register_drop.get(),
+                           'year': year_register_drop.get(),
+                           'path_pic': "C:/Users/lenovo/PycharmProjects/LicentaSasu/images/defaultprofilepicture/1.jpg"
                        })
+
+        sql_query = """SELECT oid FROM users WHERE username=?"""
+        cursor.execute(sql_query, (username_register_input.get(),))
+        registered_user_original_id = cursor.fetchone()
+        registered_user_pwd =  password_register_input.get().encode("utf-8")
+        registered_user_salt = bcrypt.gensalt()
+        registered_user_hashpwd = bcrypt.hashpw(registered_user_pwd, registered_user_salt)
+
+        cursor.execute("INSERT INTO parole VALUES (:user_id, :salt , :hashpass)",
+                    {
+                    'user_id': registered_user_original_id[0],
+                    'salt': registered_user_salt.decode(),
+                    'hashpass': registered_user_hashpwd.decode()
+                    })
+
+        conn.commit()
+        conn.close()
         response = messagebox.showinfo("Info!", "Inregistrarea a avut loc cu succes! ")
         if response == "ok":
             reg.destroy()
-
     else:
         reponse = messagebox.showerror("Error!", "Emailul are formatul incorect!!")
 
-    conn.commit()
-    conn.close()
 
-
+# Functia este handle pentru login button, daca username si parola sunt corecte, ne logam, altfel primim eroare.
 def login_function():
     conn = sqlite3.connect('users.db')
     cursor = conn.cursor()
 
-    cursor.execute("SELECT * FROM users")
-    users_database = cursor.fetchall()
+    sql_query = """SELECT oid, username FROM users WHERE username = ?"""
+    cursor.execute(sql_query, (username_login_input.get(),))
+    username_database = cursor.fetchone()
 
-    logged_in = "fail"
-    #Caut userul si parola in userii din baza de date
-    for user_database in users_database:
-        if user_database[2] == username_login_input.get() and user_database[3] == password_login_input.get():
-            logged_in = "succes"
-            break
+    if username_database != None:
+        connpwd = sqlite3.connect('users.db')
+        cursorpwd = connpwd.cursor()
 
-    if logged_in == "fail":
-        response = messagebox.showerror("Error", "Datele introduse sunt invalide! Reincercati!")
+        sql_query =  """SELECT hashpass FROM parole WHERE user_id=?"""
+        cursorpwd.execute(sql_query,(username_database[0],))
+        hashpass_database = cursorpwd.fetchone()
+
+        attempt_password = password_login_input.get()
+
+        if bcrypt.checkpw(attempt_password.encode("utf-8"), hashpass_database[0].encode("utf-8")) == True:
+            connpwd.commit()
+            connpwd.close()
+            login_frame.grid_forget()
+            logged_in_function()
+        else:
+            response = messagebox.showerror("Error", "Datele introduse sunt invalide! Reincercati!")
     else:
-        login_frame.grid_forget()
-        logged_in_function()
-
-
+        response = messagebox.showerror("Error", "Datele introduse sunt invalide! Reincercati!")
     conn.commit()
     conn.close()
 
 
+# Functia este handle pentru logout button, daca dorim sa ne delogam, ne intoarcem la login_frame_show iar celelalte
+# ferestre deschise sunt distruse.
 def logout_function():
     response = messagebox.askyesno("Disconnect", "Doriti sa va delogati?")
     if response == True:
         logged_in_frame.destroy()
-        login_frame_show()
+        profile_window.destroy()
+        courses_window.destroy()
+        hobbies_window.destroy()
+        grades_window.destroy()
+
+        application_on()
         username_login_input.config(text="")
         password_login_input.config(text="")
     else:
@@ -149,17 +178,16 @@ def querry_data_logged_user(logged_user):
     conn = sqlite3.connect('users.db')
     cursor = conn.cursor()
 
-    sql_query = """SELECT oid, first_name, year, specialization FROM users WHERE username = ?"""
+    sql_query = """SELECT oid, prenume, nume, username, email, data_inregistrare, program, domeniu, specializare, an FROM users WHERE username = ?"""
     cursor.execute(sql_query, (logged_user,))
     user_database = cursor.fetchone()
 
     conn.commit()
     conn.close()
+    return user_database
 
-    return user_database[0], user_database[1], user_database[2], user_database[3]
 
-
-#Functia furnizeaza semestrul actual
+#Functia furnizeaza semestrul actual in functie de data in care ne aflam: semestrul 1 / 2 / vacanta de vara
 def get_current_semester():
     today = date.today()
     today_format = today.strftime("%m/%d/%y")
@@ -181,12 +209,12 @@ def get_current_semester():
 
 
 # Functia cauta in baza de date materiile corespunzatoare: specializarii userului, anul si semestrul
-def querry_courses(year, semester):
+def querry_courses(specialization, year, semester):
     conn = sqlite3.connect('materii.db')
     cursor = conn.cursor()
 
-    sql_query = """SELECT nume FROM materii WHERE specializare = ? AND an = ? and semestru = ?"""
-    cursor.execute(sql_query, (logged_specialization, year, semester))
+    sql_query = """SELECT nume FROM materii WHERE specializare = ? AND an = ? AND semestru = ?"""
+    cursor.execute(sql_query, (specialization, year, semester))
     courses_database = cursor.fetchall()
 
     conn.commit()
@@ -196,37 +224,34 @@ def querry_courses(year, semester):
 
 # Functia apeleaza functia care furnizeaza materiile curente si le afiseaza
 # TO BE DESIGNED000003
-def querry_current_courses():
+def show_current_courses():
+    global courses_window
     courses_window = Toplevel()
     courses_window.title("Materii")
     courses_window.geometry("450x500")
 
     current_semester = get_current_semester()
 
-    courses_database = querry_courses(logged_year, current_semester)
-
     if current_semester == 0:
-        print("Vacanta de vara! Vacanta placuta")
+        summer = Label(courses_window, text="Vacanta placuta!", font=("Helvetica", 13))
+        summer.pack()
     else:
-        hi_courses = Label(courses_window, text="Materiile pentru care trebuie sa te pregatesti sunt cele din: /t Anul "+logged_year+", semestrul "+str(current_semester))
+        courses_database = querry_courses(logged_specialization, logged_year, current_semester)
+        hi_courses = Label(courses_window, text="Materiile pentru care trebuie sa te pregatesti sunt cele din Anul "+logged_year+", semestrul "+str(current_semester), font=("Helvetica", 9))
         hi_courses.pack()
         for course in courses_database:
             course_label = Label(courses_window, text=course[0])
             course_label.pack()
 
 
-# Functia e folosita in querry_grades pentru putea itera prin ani si sa putem afisa notele din anii trecuti
-def get_current_year_as_int():
-    if logged_year == "III": return 3
-    if logged_year == "II": return 2
-    if logged_year == "I": return 1
-
+#Functia e folosita in querry_grades pentru a returna valoarea int a unui an, folosita in querry_courses
 def get_year_as_int(string_year):
     if string_year == "III": return 3
     if string_year == "II": return 2
     if string_year == "I": return 1
 
-# Functia e folosita in querry_grades pentru a ne permite sa apelan querry_courses dupa an(string) / semestru
+
+# Functia e folosita in querry_grades pentru a ne permite sa apelam querry_courses dupa an(string) / semestru
 def get_year_as_string(int_year):
     if int_year == 1: return "I"
     if int_year == 2: return "II"
@@ -240,9 +265,21 @@ def get_past_courses(semesters_to_show):
     cursor_year = 1
     courses_done = []
 
+    if logged_specialization == "Mate-Info" or logged_specialization == "Mate-Aplicata":
+        while shown_semester <= 2:
+            cursor_year_string = get_year_as_string(cursor_year)
+            courses = querry_courses("Matematica", cursor_year_string, cursor_semester)
+            for course in courses:
+                courses_done.append(course[0])
+            shown_semester += 1
+            cursor_semester += 1
+
+        cursor_year = 2
+        cursor_semester = 1
+
     while shown_semester != semesters_to_show + 1:
         cursor_year_string = get_year_as_string(cursor_year)
-        courses = querry_courses(cursor_year_string, cursor_semester)
+        courses = querry_courses(logged_specialization, cursor_year_string, cursor_semester)
 
         for course in courses:
             courses_done.append(course[0])
@@ -255,9 +292,10 @@ def get_past_courses(semesters_to_show):
 
     return courses_done
 
+
 # Functia furnizeaza un vector de note care corespunde vectorului user past courses
 def get_grades_from_database(user_past_courses):
-    conn = sqlite3.connect('note.db')
+    conn = sqlite3.connect('users.db')
     cursor = conn.cursor()
     grades = []
 
@@ -272,8 +310,9 @@ def get_grades_from_database(user_past_courses):
     return grades
 
 
+# Functia actualizeaza notele in baza de date
 def commit_grades_database(course_dropdowns, user_past_courses):
-    conn = sqlite3.connect('note.db')
+    conn = sqlite3.connect('users.db')
     cursor = conn.cursor()
     commited_user_grades = []
 
@@ -297,7 +336,7 @@ def commit_grades_database(course_dropdowns, user_past_courses):
         grades_window.destroy()
 
 
-# Functia furnizeaza notele obtinute la fiecare materie pana in prezent
+# Functia afiseaza pe grades_window materiile si notele pe care le-am obtinut, din trecut pana in prezent.
 def report_card():
     global grades_window
     grades_window = Toplevel()
@@ -305,7 +344,7 @@ def report_card():
     grades_window.geometry("450x800")
 
     current_semester = get_current_semester() # Aflam semestrul in care suntem
-    current_year = get_current_year_as_int() # Luam anul in care suntem ca int
+    current_year = get_year_as_int(logged_year) # Luam anul in care suntem ca int
 
     # Aflam cate semestre trebuie sa postam
     if current_semester == 2:
@@ -336,93 +375,324 @@ def report_card():
     save_changes = Button(grades_window, text="Salveaza", command=lambda: commit_grades_database(course_dropdowns, user_past_courses))
     save_changes.grid(row=linie+1, column=0, columnspan=2, pady=20)
 
-def clicked2_hobby(i):
-    hobby_images_buttons[i].config(width = 200, height= 150, command=lambda: clicked_hobby(i))
+
+# Functia deselecteaza un hobby: ii reseteaza dimensiunile si padding normal + il scoate din lista de hobby-uri selectate
+def deselect_hobby(i):
+    hobby_images_buttons[i].config(width = 200, height= 150, command=lambda: select_hobby(i))
     hobby_images_buttons[i].grid(padx=0, pady=0)
-
-def clicked_hobby(i):
-    hobby_images_buttons[i].config(width = 150, height= 100, command=lambda: clicked2_hobby(i))
-    hobby_images_buttons[i].grid(padx=25, pady=25)
+    selected_hobbies.remove(i)
 
 
+# Functia selecteaza un hobby: ii schima dimensiunile si paddingul + il adauga in lista de hobby-uri selectate
+def select_hobby(i):
+    if len(selected_hobbies) <= 5:
+        selected_hobbies.append(i)
+        hobby_images_buttons[i].config(width=150, height=100, command=lambda: deselect_hobby(i))
+        hobby_images_buttons[i].grid(padx=25, pady=25)
+    else:
+        messagebox.showinfo("Info", "Ați selectat deja 6 ocupații!")
 
-def users_hobbies():
-    global hobbies_window
-    hobbies_window = Toplevel()
-    hobbies_window.title("Ocupațiile mele")
+
+# Adaug hobby-urile userului in baza de date: Daca e prima data cand userul introduce hobby-uri, atunci inserez
+# Daca userul isi editeaza hobby-urile, atunci fac update
+def commit_hobbies_database():
+    conn = sqlite3.connect('users.db')
+    cursor = conn.cursor()
+
+    cursor.execute("SELECT id_user FROM usershobbies")
+    users = cursor.fetchall()
+
+    user_has_hobbies = 0
+    for user in users:
+        if user[0] == logged_original_id:
+            user_has_hobbies = 1
+
+    if len(selected_hobbies) == 6:
+        if user_has_hobbies == 1:
+            cursor.execute("""UPDATE usershobbies SET
+                        index_1 = :first,
+                        index_2 = :second,
+                        index_3 = :third,
+                        index_4 = :fourth,
+                        index_5 = :fiveth,
+                        index_6 = :sixth
+                        where id_user = :user_id""",
+                           {'first': selected_hobbies[0],
+                            'second':selected_hobbies[1],
+                            'third': selected_hobbies[2],
+                            'fourth': selected_hobbies[3],
+                            'fiveth': selected_hobbies[4],
+                            'sixth': selected_hobbies[5],
+                            'user_id': logged_original_id
+                            })
+            response = messagebox.showinfo("Info", "Modificările au fost salvate!")
+
+            if response == "ok":
+                hobbies_edit_window.destroy()
+            conn.commit()
+            conn.close()
+        else:
+            cursor.execute("INSERT INTO usershobbies VALUES (:id_user, :index_1, :index_2, :index_3, :index_4, :index_5, :index_6)",
+                           {
+                               'id_user': logged_original_id,
+                               'index_1': selected_hobbies[0],
+                               'index_2': selected_hobbies[1],
+                               'index_3': selected_hobbies[2],
+                               'index_4': selected_hobbies[3],
+                               'index_5': selected_hobbies[4],
+                               'index_6': selected_hobbies[5],
+                           })
+            response = messagebox.showinfo("Info", "Modificările au fost salvate!")
+
+            if response == "ok":
+                hobbies_edit_window.destroy()
+            conn.commit()
+            conn.close()
+
+    else:
+        messagebox.showwarning("Avertisment", "Trebuie să alegeți 6 ocupații.")
+
+
+# Functia intoarce hobbyurile unui user, folosita pentru a afisa hobbyurile care au fost selectate in trecut
+def get_selected_hobbies_database():
+    conn = sqlite3.connect('users.db')
+    cursor = conn.cursor()
+
+    selected_hobbies_from_database = []
+    sql_query = """SELECT index_1, index_2, index_3, index_4, index_5, index_6 FROM usershobbies WHERE id_user = ?"""
+    cursor.execute(sql_query, (logged_original_id,))
+    selected_hobbies_from_database_tuple = cursor.fetchone()
+
+    if selected_hobbies_from_database_tuple != None:
+        for hobby in selected_hobbies_from_database_tuple:
+            selected_hobbies_from_database.append(hobby)
+
+    conn.commit()
+    conn.close()
+    return selected_hobbies_from_database
+
+
+# Functia permite userului sa-si aleaga alte hobby-uri dintr-o matrice de 3 x 7. Noile hobby-uri vor fi salvate
+# in baza de date cu ajutorul butonului save_hobbies care apeleaza commit_hobbies_database()
+def edit_hobbies():
+    global hobbies_edit_window
+    hobbies_edit_window = Toplevel()
+    hobbies_edit_window.title("Noile ocupațiile")
+    pick_hobbies = Label(hobbies_edit_window, text="Alege 6 ocupatii preferate!", font=("Helvetica", 12))
+    pick_hobbies.grid(row=0, column=3)
 
     global hobby_images_buttons
-    global hobby_images_list
-    hobby_images_list = []
     hobby_images_buttons = []
 
     for i in range(21):
-        image = Image.open("C:/Users/lenovo/PycharmProjects/LicentaSasu/images/"+str(i)+".jpg")
+        image = Image.open("C:/Users/lenovo/PycharmProjects/LicentaSasu/images/" + str(i) + ".jpg")
         image = image.resize((200, 150), Image.ANTIALIAS)
         hobby_img_to_post = ImageTk.PhotoImage(image)
 
         hobby_images_buttons.append(i)
-        hobby_images_buttons[i] = Button(hobbies_window, image=hobby_img_to_post, command= lambda index=i: clicked_hobby(index))
+        if i not in selected_hobbies:
+            hobby_images_buttons[i] = Button(hobbies_edit_window, image=hobby_img_to_post,
+                                             command=lambda index=i: select_hobby(index))
+        else:
+            hobby_images_buttons[i] = Button(hobbies_edit_window, image=hobby_img_to_post,
+                                             command=lambda index=i: deselect_hobby(index), width=150, height=100)
+
         hobby_images_buttons[i].image = (hobby_img_to_post)
 
-        hobby_images_list.append(hobby_img_to_post)
-
-    r = 0
+    r = 1
     c = 0
     for but in hobby_images_buttons:
         if c == 7:
             r += 1
             c = 0
-        but.grid(row=r, column=c)
+        if hobby_images_buttons.index(but) in selected_hobbies:
+            but.grid(row=r, column=c, padx=25, pady=25)
+        else:
+            but.grid(row=r, column=c)
         c += 1
 
-    for img in hobby_images_list:
-        print(img)
+    save_hobbies = Button(hobbies_edit_window, text="Salveaza", command=commit_hobbies_database)
+    save_hobbies.grid(row=5, column=2, columnspan=2)
 
 
+# Functia afiseaza in hobbies_window, hobby-urile selectate anterior de catre user
+def post_users_hobbies():
+    col = 0
+    for i in selected_hobbies:
+        image = Image.open("C:/Users/lenovo/PycharmProjects/LicentaSasu/images/" + str(i) + ".jpg")
+        image = image.resize((200, 150), Image.ANTIALIAS)
+        hobby_img_to_post = ImageTk.PhotoImage(image)
+
+        hobby_img_label = Label(hobbies_window, image=hobby_img_to_post)
+        hobby_img_label.image = hobby_img_to_post
+        hobby_img_label.grid(row=1, column=col)
+        col += 1
+
+
+# Functia verifica prima data daca userul are hobby-uri in tabela usershobbies, daca da atunci le afiseaza si permite
+# editarea acestora, daca nu, functia afiseaza direct fereastra de selectare a hobby-urilor
+# hobbyurile selectate sunt afisate prin intermediul functiei post_users_hobbies
+def users_hobbies():
+    global hobbies_window
+    hobbies_window = Toplevel()
+    hobbies_window.title("Ocupațiile mele")
+
+    global selected_hobbies
+    selected_hobbies = get_selected_hobbies_database()
+    if len(selected_hobbies) == 0:
+        edit_hobbies()
+        hobbies_window.destroy()
+    else:
+        your_hobbies = Label(hobbies_window, text="Ocupații preferate:")
+        your_hobbies.grid(row=0, column=0)
+
+        post_users_hobbies()
+
+        edit_button = Button(hobbies_window, text="Editeaza", command=edit_hobbies)
+        edit_button.grid(row=2, column=2, columnspan=2)
+        refresh_button_hobbies = Button(hobbies_window, text="Refresh", command=post_users_hobbies)
+        refresh_button_hobbies.grid(row=2, column=3)
+
+
+# Functia deschide fereastra de selectare a unei noi poze de profil. O data aleasa poza, functia va face update in
+# tabela users, linia userului logat, coloana cale_imagine si va pune calea noii imagini.
+def browse_profile_picture():
+    global profile_picture
+    #root.filename returneaza calea catre ceea ce selectez, initialdir ce se deschide, filetypes e ce tipuri pot accepta si trebuie sa respecte patternul ("png files", "*.png")
+    root.filename = filedialog.askopenfilename(initialdir="C:/Users/lenovo/PycharmProjects/LicentaSasu/images", title="Select a file", filetypes=(("png files", "*.png"),("jpeg files","*.jpg"),("all files","*.*")))
+    if root.filename != "":
+        conn = sqlite3.connect('users.db')
+        cursor = conn.cursor()
+        cursor.execute("""UPDATE users SET
+                   cale_imagine = :path
+                   where oid = :oid""",
+                       {'path': root.filename,
+                        'oid': logged_original_id
+                        })
+        picture = Image.open(root.filename)
+        picture = picture.resize((400, 350), Image.ANTIALIAS)
+        profile_picture = ImageTk.PhotoImage(picture)
+        profile_picture_label = Label(profile_window, image=profile_picture)
+        profile_picture_label.image = profile_picture
+        profile_picture_label.grid(row=1, column=2, rowspan=9, padx=(130, 0))
+
+        conn.commit()
+        conn.close()
+
+
+# Functia afiseaza in profile_window poza de profil aferenta userului logat
+def get_profile_picture_from_database():
+    conn = sqlite3.connect('users.db')
+    cursor = conn.cursor()
+
+    sql_querry = "SELECT cale_imagine FROM users WHERE oid=?"
+    cursor.execute(sql_querry, (logged_original_id,))
+    profile_picture_path = cursor.fetchone()
+    picture = Image.open(profile_picture_path[0])
+    picture = picture.resize((400, 350), Image.ANTIALIAS)
+    profile_picture = ImageTk.PhotoImage(picture)
+
+    profile_picture_label = Label(profile_window, image=profile_picture)
+    profile_picture_label.image = profile_picture
+    profile_picture_label.grid(row=1, column=2, rowspan=9, padx=(130, 0))
+
+    conn.commit()
+    conn.close()
+
+
+# Functia deschide fereastra Profilul meu si afiseaza datele corespunzatoare userului logat
+# Aceasta permite adaugarea unei noi imagini de profil, imaginea default este luata din baza de date
+def show_profile():
+    global profile_window
+    profile_window= Toplevel()
+    profile_window.title("Profilul meu")
+    profile_window.geometry("800x500")
+    profile_window.resizable(False, False)
+
+    profile_welcome_frame = LabelFrame(profile_window, bd=0)
+    profile_welcome_frame.grid(row=0, column=1, columnspan=2, padx=(0, 140))
+    profile_welcome = Label(profile_welcome_frame, text="Bine ai venit pe profilul tau! \n Mai jos sunt informatiile aferente contului tau.", font=("Helvetica", 11))
+    profile_welcome.grid(row=0, column=0, columnspan=2, pady=20)
+
+    first_name_profile_label = Label(profile_window, text="Prenume: " + logged_first_name, anchor="w")
+    first_name_profile_label.grid(row=1, column=0, padx=(40,0))
+    last_name_profile_label = Label(profile_window, text="Nume: " + logged_last_name)
+    last_name_profile_label.grid(row=2, column=0, padx=(40,0))
+    username_profile_label = Label(profile_window, text="Username: "+ logged_username)
+    username_profile_label.grid(row=3, column=0, padx=(40,0))
+    email_profile_label = Label(profile_window, text="Email: "+ logged_email)
+    email_profile_label.grid(row=4, column=0, padx=(40,0))
+    join_date_label = Label(profile_window, text="Data inregistrarii: "+ logged_join_date)
+    join_date_label.grid(row=5, column=0, padx=(40,0))
+    program_profile_label = Label(profile_window, text="Program de studiu: "+ logged_program)
+    program_profile_label.grid(row=6, column=0, padx=(40,0))
+    domain_profile_label = Label(profile_window, text="Domeniul: "+ logged_profile)
+    domain_profile_label.grid(row=7, column=0, padx=(40,0))
+    specialization_profile_label = Label(profile_window, text="Specializarea: "+ logged_specialization)
+    specialization_profile_label.grid(row=8, column=0, padx=(40,0))
+    year_profile_label = Label(profile_window, text="Anul: "+ logged_year)
+    year_profile_label.grid(row=9, column=0, padx=(40,0))
+
+    browse_profile_label = Label(profile_window, text="Adauga o noua fotografie: ")
+    browse_profile_label.grid(row=10, column=0)
+    browse_profile_button = Button(profile_window, text="Browse", padx=177, command=browse_profile_picture)
+    browse_profile_button.grid(row=10, column=2, padx=(130, 0))
+
+    get_profile_picture_from_database()
+
+
+# Functia afiseaza logged_in_frame, ceea ce vede un utilizator dupa ce s-a logat cu succes.
 def logged_in_function():
     global logged_in_frame
     logged_in_frame = LabelFrame(root, bg="white",  width=1000, height=700, bd=0, padx=60, pady=30)
     logged_in_frame.place(relx=.15, rely=.1)
     logged_user = username_login_input.get()
     global logged_original_id
-    global logged_name
+    global logged_first_name
+    global logged_last_name
+    global logged_email
+    global logged_username
+    global logged_join_date
     global logged_year
+    global logged_program
+    global logged_profile
     global logged_specialization
-    (logged_original_id, logged_name, logged_year, logged_specialization) = querry_data_logged_user(logged_user)
+    (logged_original_id, logged_first_name, logged_last_name, logged_username, logged_email, logged_join_date, logged_program, logged_profile, logged_specialization, logged_year) = querry_data_logged_user(logged_user)
 
     #Pentru a manipula Welcome label text si logout button, schimb valorile din padx din gridurile lor
     top_bar_frame = LabelFrame(logged_in_frame, width=850, height=100, bg="white")
     top_bar_frame.grid(row=0, column=0, columnspan=2, sticky="ew")
-    welcome_label = Label(top_bar_frame, text="Salut, " + logged_name + "!", bg="white", font=("Helvetica", 15))
+    welcome_label = Label(top_bar_frame, text="Salut, " + logged_first_name + "!", bg="white", font=("Helvetica", 15))
     welcome_label.grid(row=0, column=0, padx=(10,170))
     logout_button = Button(top_bar_frame, text="Log off", command=logout_function)
-    logout_button.grid(row=0, column=1, sticky="ew", padx=(475, 0))
+    logout_button.grid(row=0, column=2, sticky="ew")
+    faq_button = Button(top_bar_frame, text="FAQ")
+    faq_button.grid(row=0, column=1, sticky="ew", padx=(440, 0))
 
     menu_frame = LabelFrame(logged_in_frame, bg="white", width=850, height=500)
     menu_frame.grid(row=1, column=0)
 
-    profile_button_menu = Button(menu_frame, text="Profil", pady=83, padx=110, bd=0)
+    profile_button_menu = Button(menu_frame, text="Profil", pady=83, padx=110, bd=0, command=show_profile)
     profile_button_menu.grid(row=0, column=0 , sticky="ew")
-    courses_button_menu = Button(menu_frame, text="Materii", pady=83, padx=110, bd=0, command=querry_current_courses)
+    courses_button_menu = Button(menu_frame, text="Materii", pady=83, padx=110, bd=0, command=show_current_courses)
     courses_button_menu.grid(row=0, column=1, sticky="ew", padx=10)
     timetable_button_menu = Button(menu_frame, text="Orar", pady=83, padx=110, bd=0)
     timetable_button_menu.grid(row=0, column=2, sticky="ew")
     hobbies_button_menu = Button(menu_frame, text="Hobbies", pady=83, padx=110, bd=0, command=users_hobbies)
     hobbies_button_menu.grid(row=1, column=0, sticky="ew", pady=10)
-    schedule_button_menu = Button(menu_frame, text="Programul meu", pady=83, padx=110, bd=0)
+    schedule_button_menu = Button(menu_frame, text="Program", pady=83, padx=110, bd=0)
     schedule_button_menu.grid(row=1, column=1, sticky="ew", padx=10, pady=10)
-    session_schedule_button_menu = Button(menu_frame, text="Programul meu Sesiune", pady=83, padx=90, bd=0)
+    session_schedule_button_menu = Button(menu_frame, text="Sesiune", pady=81, padx=90, bd=0)
     session_schedule_button_menu.grid(row=1, column=2, sticky="ew", pady=10)
     carnet_button_menu = Button(menu_frame, text="Carnet", pady=83, padx=110, bd=0, command=report_card)
     carnet_button_menu.grid(row=2, column=0 , sticky="ew")
-    calendar_button_menu = Button(menu_frame, text="Calendar", pady=83, padx=110, bd=0)
+    calendar_button_menu = Button(menu_frame, text="Examene", pady=83, padx=110, bd=0)
     calendar_button_menu.grid(row=2, column=1, sticky="ew", padx=10)
-    faq_button_menu = Button(menu_frame, text="FAQ", pady=83, padx=110, bd=0)
-    faq_button_menu.grid(row=2, column=2, sticky="ew")
+    notifications_button_menu = Button(menu_frame, text="Notificari", pady=83, padx=110, bd=0)
+    notifications_button_menu.grid(row=2, column=2, sticky="ew")
 
 
-
+# Functia permite utilizatorilor noi se inregistreze
 # Nu vreau mai multe ferestre din register pe ecran TO BE DONE
 def register_window_show():
     #Fereastra reg este globala pentru a putea fi distrusa in momentul in care un user s a inregistrat
@@ -450,10 +720,6 @@ def register_window_show():
         "Mate-Info",
         "Mate-Aplicata"
     ]
-    study_schoolarships = [
-        "ID",
-        "IF"
-    ]
     study_years = [
         "I",
         "II",
@@ -480,14 +746,12 @@ def register_window_show():
     email_register_label.grid(row=4, column=0, sticky=W)
     study_program_label = Label(frame_register, text="Programul de studiu: ")
     study_program_label.grid(row=5, column=0, pady=(20,0), sticky=W)
-    profile_register_label = Label(frame_register, text="Profil: ")
+    profile_register_label = Label(frame_register, text="Domeniul: ")
     profile_register_label.grid(row=6, column=0, sticky=W, pady=(4,0))
     specialization_register_label = Label(frame_register, text="Specializare: ")
     specialization_register_label.grid(row=7, column=0, sticky=W, pady=(4,0))
-    schoolship_register_label = Label(frame_register, text="Forma invatamant: ")
-    schoolship_register_label.grid(row=8, column=0, sticky=W, pady=(4,0))
     year_register_label = Label(frame_register, text="Anul de studiu: ")
-    year_register_label.grid(row=9, column=0, sticky=W, pady=(4,0))
+    year_register_label.grid(row=8, column=0, sticky=W, pady=(4,0))
 
 
     # Input fields pentru Register
@@ -500,7 +764,6 @@ def register_window_show():
     global program_register_drop
     global profile_register_drop
     global specialization_register_drop
-    global schoolship_register_drop
     global year_register_drop
     first_name_register_input = Entry(frame_register, width=30)
     first_name_register_input.grid(row=0, column=1, padx=15)
@@ -508,7 +771,7 @@ def register_window_show():
     last_name_register_input.grid(row=1, column=1)
     username_register_input = Entry(frame_register, width=30)
     username_register_input.grid(row=2, column=1)
-    password_register_input = Entry(frame_register, width=30)
+    password_register_input = Entry(frame_register, width=30, show="*")
     password_register_input.grid(row=3, column=1)
     email_register_input = Entry(frame_register, width=30)
     email_register_input.grid(row=4, column=1)
@@ -522,18 +785,16 @@ def register_window_show():
     specialization_register_drop = ttk.Combobox(frame_register, value=study_specializations)
     specialization_register_drop.grid(row=7, column=1, pady=(4,0))
     specialization_register_drop.current(0)
-    schoolship_register_drop = ttk.Combobox(frame_register, value=study_schoolarships)
-    schoolship_register_drop.grid(row=8, column=1, pady=(4,0))
-    schoolship_register_drop.current(0)
     year_register_drop = ttk.Combobox(frame_register, value=study_years)
-    year_register_drop.grid(row=9, column=1, pady=(4,0))
+    year_register_drop.grid(row=8, column=1, pady=(4,0))
     year_register_drop.current(0)
 
     submit_button_register = Button(frame_register, text="Inregistrare", command=register_database_function)
     submit_button_register.grid(row=10, column=0, columnspan=2, pady=10, ipadx=125)
 
 
-def login_frame_show():
+# Functia afiseaza pe ecran aplicatia
+def application_on():
     global login_frame
     login_frame = LabelFrame(root, padx=30, pady=80)
     login_frame.grid(row=0, column=0, padx=540, pady=200)
@@ -565,8 +826,8 @@ def login_frame_show():
     forget_button_login.grid(row=4, column=1, ipadx=36)
 
 
-login_frame_show()
-conn.commit()
-conn.close()
+application_on()
+
+
 root.mainloop()
 
