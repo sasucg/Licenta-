@@ -5,6 +5,7 @@ from tkinter import messagebox, ttk
 from PIL import ImageTk, Image
 import bcrypt
 from tkinter import filedialog
+import ast
 
 
 root = Tk()
@@ -114,6 +115,16 @@ def register_database_function():
                     'hashpass': registered_user_hashpwd.decode()
                     })
 
+        cursor.execute("INSERT INTO orar VALUES (:id_user, :luni, :marti, :miercuri, :joi, :vineri)",
+                       {
+                           'id_user': registered_user_original_id[0],
+                           'luni': None,
+                           'marti': None,
+                           'miercuri': None,
+                           'joi': None,
+                           'vineri': None,
+                       })
+
         conn.commit()
         conn.close()
         response = messagebox.showinfo("Info!", "Inregistrarea a avut loc cu succes! ")
@@ -161,10 +172,10 @@ def logout_function():
     response = messagebox.askyesno("Disconnect", "Doriti sa va delogati?")
     if response == True:
         logged_in_frame.destroy()
-        profile_window.destroy()
-        courses_window.destroy()
-        hobbies_window.destroy()
-        grades_window.destroy()
+        # profile_window.destroy()
+        # courses_window.destroy()
+        # hobbies_window.destroy()
+        # grades_window.destroy()
 
         application_on()
         username_login_input.config(text="")
@@ -212,14 +223,16 @@ def get_current_semester():
 def querry_courses(specialization, year, semester):
     conn = sqlite3.connect('materii.db')
     cursor = conn.cursor()
-
+    courses_database_as_list = []
     sql_query = """SELECT nume FROM materii WHERE specializare = ? AND an = ? AND semestru = ?"""
     cursor.execute(sql_query, (specialization, year, semester))
     courses_database = cursor.fetchall()
-
+    for course in courses_database:
+        courses_database_as_list.append(course[0])
     conn.commit()
     conn.close()
-    return courses_database
+
+    return courses_database_as_list
 
 
 # Functia apeleaza functia care furnizeaza materiile curente si le afiseaza
@@ -240,7 +253,7 @@ def show_current_courses():
         hi_courses = Label(courses_window, text="Materiile pentru care trebuie sa te pregatesti sunt cele din Anul "+logged_year+", semestrul "+str(current_semester), font=("Helvetica", 9))
         hi_courses.pack()
         for course in courses_database:
-            course_label = Label(courses_window, text=course[0])
+            course_label = Label(courses_window, text=course)
             course_label.pack()
 
 
@@ -270,7 +283,7 @@ def get_past_courses(semesters_to_show):
             cursor_year_string = get_year_as_string(cursor_year)
             courses = querry_courses("Matematica", cursor_year_string, cursor_semester)
             for course in courses:
-                courses_done.append(course[0])
+                courses_done.append(course)
             shown_semester += 1
             cursor_semester += 1
 
@@ -282,7 +295,7 @@ def get_past_courses(semesters_to_show):
         courses = querry_courses(logged_specialization, cursor_year_string, cursor_semester)
 
         for course in courses:
-            courses_done.append(course[0])
+            courses_done.append(course)
 
         cursor_semester += 1
         if cursor_semester == 3:
@@ -337,7 +350,7 @@ def commit_grades_database(course_dropdowns, user_past_courses):
 
 
 # Functia afiseaza pe grades_window materiile si notele pe care le-am obtinut, din trecut pana in prezent.
-def report_card():
+def show_report_card():
     global grades_window
     grades_window = Toplevel()
     grades_window.title("Carnet de note")
@@ -353,15 +366,14 @@ def report_card():
         semesters_to_show = current_year * 2 - 1
 
     user_past_courses = get_past_courses(semesters_to_show) # Luam toate cursurile din trecut + cele din prezent
-    user_grades = get_grades_from_database(user_past_courses) # Luam notele la notele din trecut + cele din prezent unele vor fi None
-
+    user_grades = get_grades_from_database(user_past_courses) # Luam notele la materiile din trecut + cele din prezent unele vor fi None
     note = ["-", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10"]
     course_dropdowns = [] # Vectorul in care tinem casutele de tip dropdown si valorile acestora. Casutele corespund materiei i din vecctorul user_past_courses
 
     linie = 0 # Linia ne ajuta la postarea elementelor in fereastra
     for i in range(0, len(user_past_courses)):  # Pentru fiecare curs, il postam in stanga si nota acestuia in dreapta
         course_text_label = Label(grades_window, text=user_past_courses[i])
-        course_text_label.grid(row=linie, column=0)
+        course_text_label.grid(row=linie, column=0, sticky="w")
 
         course_dropdown = ttk.Combobox(grades_window, value=note)
         if  user_grades[i] == None:
@@ -532,7 +544,7 @@ def post_users_hobbies():
 # Functia verifica prima data daca userul are hobby-uri in tabela usershobbies, daca da atunci le afiseaza si permite
 # editarea acestora, daca nu, functia afiseaza direct fereastra de selectare a hobby-urilor
 # hobbyurile selectate sunt afisate prin intermediul functiei post_users_hobbies
-def users_hobbies():
+def show_users_hobbies():
     global hobbies_window
     hobbies_window = Toplevel()
     hobbies_window.title("Ocupațiile mele")
@@ -552,6 +564,140 @@ def users_hobbies():
         edit_button.grid(row=2, column=2, columnspan=2)
         refresh_button_hobbies = Button(hobbies_window, text="Refresh", command=post_users_hobbies)
         refresh_button_hobbies.grid(row=2, column=3)
+
+
+def commit_courses_of_day(Day):
+    conn = sqlite3.connect('users.db')
+    cursor = conn.cursor()
+
+    cursor.execute("UPDATE orar SET "+Day+"=:orar WHERE id_user = :oid",
+                {'orar': str(courses_list_for_day),
+                'oid': logged_original_id
+                })
+
+    messagebox.showinfo("Info", "Modificarile au fost salvate")
+    edit_day_window.destroy()
+
+    conn.commit()
+    conn.close()
+
+def add_course_for_edit():
+    if this_many_courses.get() != "":
+        number_of_courses_for_day = int(this_many_courses.get())
+        this_many_courses.destroy()
+        how_many_courses.destroy()
+        add_course_button.config(state=DISABLED)
+        course_type_list = [
+            "Curs",
+            "Laborator",
+            "Seminar"
+        ]
+        current_semester = get_current_semester()
+        courses_list = querry_courses(logged_specialization, logged_year, current_semester)
+        hours = [8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
+
+        # Lista cursurilor dintr-o zi este globala pentru a putea fi salvata in baza de date in functia save_courses_of_day
+        global courses_list_for_day
+        courses_list_for_day = []
+        for i in range(0,number_of_courses_for_day):
+            course_type_drop = ttk.Combobox(edit_day_window, value=course_type_list)
+            course_type_drop.grid(row=i+1, column=0, pady=(20, 20))
+            course_type_drop.current(0)
+
+            course_name_drop = ttk.Combobox(edit_day_window, value=courses_list)
+            course_name_drop.grid(row=i+1, column=1, pady=(20, 20))
+            course_name_drop.current(0)
+
+            hour_start_drop = ttk.Combobox(edit_day_window, value=hours)
+            hour_start_drop.grid(row=i+1, column=2, pady=(20, 20))
+            hour_start_drop.current(0)
+
+            hour_over_drop = ttk.Combobox(edit_day_window, value=hours)
+            hour_over_drop.grid(row=i+1, column=3, pady=(20, 20))
+            hour_over_drop.current(2)
+
+            courses_list_for_day.append([course_type_drop.get(), course_name_drop.get(), hour_start_drop.get(), hour_over_drop.get()])
+
+        print(courses_list_for_day)
+    else:
+        how_many_courses.config(fg="red")
+
+def edit_courses_day(Day):
+
+    global edit_day_window
+    edit_day_window = Toplevel()
+    edit_day_window.title("Editare "+Day)
+
+    save_course_button = Button(edit_day_window, text="Savealaza", command=lambda: commit_courses_of_day(Day))
+    save_course_button.grid(row=0, column=3)
+
+    edit_day_label = Label(edit_day_window, text="Editeaza materiile de "+Day)
+    edit_day_label.grid(row=0, column=1, columnspan=2)
+
+    # how many si this many sunt globale pentru a putea fi sterse in functia add courses for edit
+    global how_many_courses
+    how_many_courses = Label(edit_day_window, text="Cate materii veti studia in ziua de "+Day+"?")
+    how_many_courses.grid(row=1, column=0)
+
+    global this_many_courses
+    this_many_courses = Entry(edit_day_window, width=50)
+    this_many_courses.grid(row=1, column=1)
+
+    global add_course_button
+    add_course_button = Button(edit_day_window, text="Adauga in orarul de " + Day, command=add_course_for_edit)
+    add_course_button.grid(row=0, column=0)
+
+
+def select_courses_for_timetable(day, column):
+    conn = sqlite3.connect('users.db')
+    cursor = conn.cursor()
+
+    linie = 3
+    if day == "Miercuri" or day == "Marti" or day == "Marti":
+        sql_query = "SELECT "+day+" FROM orar WHERE id_user=?"
+        cursor.execute(sql_query, (logged_original_id,))
+        courses_from_database = cursor.fetchone()
+        course_of_day = courses_from_database[0]
+        course_of_day = ast.literal_eval(course_of_day)
+        for course in course_of_day:
+            course_timetable_label = Label(timetable_window, text=course[2] + "-" + course[3] + " " + course[0] + " " + course[1])
+            course_timetable_label.grid(row=linie, column=0)
+            linie += 1
+    else:
+        sql_query = "SELECT " + day + " FROM orar WHERE id_user=?"
+        cursor.execute(sql_query, (logged_original_id,))
+        courses_from_database = cursor.fetchone()
+        course_of_day = courses_from_database[0]
+        course_of_day = ast.literal_eval(course_of_day)
+        for course in course_of_day:
+            course_timetable_label = Label(timetable_window, text=course[2] + "-" + course[3] + " " + course[0] + " " + course[1])
+            course_timetable_label.grid(row=linie, column=0)
+            linie += 1
+
+    conn.close()
+    return
+
+def show_timetable():
+    global timetable_window
+    timetable_window = Toplevel()
+    timetable_window.title("Editarea orarului meu")
+    timetable_window.geometry("960x450")
+    timetable_window.resizable(False, False)
+
+    monday_edit_button = Button(timetable_window, text="Luni", command=lambda: edit_courses_day("Luni"), padx=50)
+    monday_edit_button.grid(row=1, column=0, padx=30)
+    tuesday_edit_button = Button(timetable_window, text="Marti", command=lambda: edit_courses_day("Marti"), padx=48)
+    tuesday_edit_button.grid(row=1, column=1, padx=30)
+    wednesday_edit_button = Button(timetable_window, text="Miercuri", command=lambda: edit_courses_day("Miercuri"), padx=40)
+    wednesday_edit_button.grid(row=1, column=2, padx=30)
+    thursday_edit_button = Button(timetable_window, text="Joi", command=lambda: edit_courses_day("Joi"), padx=54)
+    thursday_edit_button.grid(row=1, column=3, padx=30)
+    friday_edit_button = Button(timetable_window, text="Vineri", command=lambda: edit_courses_day("Vineri"), padx=46)
+    friday_edit_button.grid(row=1, column=4, padx=30)
+
+    monday_text_label = Label(timetable_window, text="Luni", font=("Halvetica", 20))
+    monday_text_label.grid(row=2, column=0)
+    select_courses_for_timetable("Luni", 0)
 
 
 # Functia deschide fereastra de selectare a unei noi poze de profil. O data aleasa poza, functia va face update in
@@ -676,18 +822,18 @@ def logged_in_function():
     profile_button_menu.grid(row=0, column=0 , sticky="ew")
     courses_button_menu = Button(menu_frame, text="Materii", pady=83, padx=110, bd=0, command=show_current_courses)
     courses_button_menu.grid(row=0, column=1, sticky="ew", padx=10)
-    timetable_button_menu = Button(menu_frame, text="Orar", pady=83, padx=110, bd=0)
+    timetable_button_menu = Button(menu_frame, text="Orar", pady=83, padx=110, bd=0, command=show_timetable)
     timetable_button_menu.grid(row=0, column=2, sticky="ew")
-    hobbies_button_menu = Button(menu_frame, text="Hobbies", pady=83, padx=110, bd=0, command=users_hobbies)
+    hobbies_button_menu = Button(menu_frame, text="Hobbies", pady=83, padx=110, bd=0, command=show_users_hobbies)
     hobbies_button_menu.grid(row=1, column=0, sticky="ew", pady=10)
     schedule_button_menu = Button(menu_frame, text="Program", pady=83, padx=110, bd=0)
     schedule_button_menu.grid(row=1, column=1, sticky="ew", padx=10, pady=10)
     session_schedule_button_menu = Button(menu_frame, text="Sesiune", pady=81, padx=90, bd=0)
     session_schedule_button_menu.grid(row=1, column=2, sticky="ew", pady=10)
-    carnet_button_menu = Button(menu_frame, text="Carnet", pady=83, padx=110, bd=0, command=report_card)
+    carnet_button_menu = Button(menu_frame, text="Carnet", pady=83, padx=110, bd=0, command=show_report_card)
     carnet_button_menu.grid(row=2, column=0 , sticky="ew")
-    calendar_button_menu = Button(menu_frame, text="Examene", pady=83, padx=110, bd=0)
-    calendar_button_menu.grid(row=2, column=1, sticky="ew", padx=10)
+    exams_button_menu = Button(menu_frame, text="Examene", pady=83, padx=110, bd=0)
+    exams_button_menu.grid(row=2, column=1, sticky="ew", padx=10)
     notifications_button_menu = Button(menu_frame, text="Notificari", pady=83, padx=110, bd=0)
     notifications_button_menu.grid(row=2, column=2, sticky="ew")
 
