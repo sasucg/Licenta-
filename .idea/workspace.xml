@@ -5,6 +5,7 @@
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/freeTime.py" beforeDir="false" afterPath="$PROJECT_DIR$/freeTime.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/users.db" beforeDir="false" afterPath="$PROJECT_DIR$/users.db" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/venv/pip-selfcheck.json" beforeDir="false" afterPath="$PROJECT_DIR$/venv/pip-selfcheck.json" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -17,24 +18,30 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/freeTime.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="17">
-              <caret line="654" column="13" selection-start-line="654" selection-start-column="13" selection-end-line="654" selection-end-column="13" />
+            <state relative-caret-position="309">
+              <caret line="286" column="12" selection-start-line="286" selection-start-column="12" selection-end-line="286" selection-end-column="12" />
               <folding>
                 <element signature="e#0#21#0" expanded="true" />
-                <element signature="e#25482#27726#0" />
+                <element signature="e#35803#38047#0" />
               </folding>
             </state>
           </provider>
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/DropdownBoxes.py">
+        <entry file="file://$PROJECT_DIR$/Checkbox.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="414">
-              <caret line="25" selection-start-line="25" selection-end-line="25" />
-              <folding>
-                <element signature="e#0#21#0" expanded="true" />
-              </folding>
+            <state relative-caret-position="221">
+              <caret line="15" column="12" selection-start-line="15" selection-start-column="12" selection-end-line="15" selection-end-column="12" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/FrameandRadiobuttons.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="119">
+              <caret line="8" selection-start-line="6" selection-end-line="8" />
             </state>
           </provider>
         </entry>
@@ -103,8 +110,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/CRUDdb.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="341">
-              <caret line="46" column="16" lean-forward="true" selection-start-line="38" selection-start-column="4" selection-end-line="46" selection-end-column="16" />
+            <state relative-caret-position="663">
+              <caret line="46" column="16" selection-start-line="38" selection-start-column="4" selection-end-line="46" selection-end-column="16" />
               <folding>
                 <element signature="e#0#21#0" expanded="true" />
                 <element signature="e#488#661#0" />
@@ -124,36 +131,36 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>logout</find>
-      <find>Schedule</find>
-      <find>repor</find>
-      <find>users_hob</find>
-      <find>geome</find>
-      <find>courses</find>
-      <find>show_current</find>
-      <find>sticky</find>
-      <find>edit_courses</find>
-      <find>conn</find>
-      <find>save_</find>
-      <find>edit_co</find>
-      <find>update</find>
-      <find>hobbie</find>
-      <find>SELECT</find>
-      <find>sql_quer</find>
-      <find>insert</find>
-      <find>register_databa</find>
-      <find>edit_</find>
-      <find>register</find>
-      <find>show_r</find>
-      <find>show_report</find>
-      <find>querry_courses</find>
-      <find>get_past_courses</find>
-      <find>Luni</find>
-      <find>resizeable</find>
-      <find>resize</find>
       <find>resiz</find>
       <find>.close</find>
+      <find>commit_courses_of_day</find>
+      <find>login</find>
+      <find>cate</find>
+      <find>show_users_hob</find>
+      <find>current_courses</find>
+      <find>querry_courses</find>
+      <find>lambda x</find>
+      <find>lambda</find>
+      <find>today</find>
+      <find>format</find>
+      <find>strptime</find>
+      <find>strf</find>
+      <find>timetable</find>
+      <find>get_current_semester</find>
+      <find>commit_cour</find>
+      <find>login_function</find>
+      <find>Examene</find>
+      <find>LabelFrame</find>
+      <find>show_current_courses</find>
+      <find>Entry</find>
+      <find>get_past_</find>
+      <find>UPDATE</find>
+      <find>commit_exams</find>
+      <find>ast.liter</find>
       <find>print</find>
+      <find>get_current_failed_courses()</find>
+      <find>combobox</find>
+      <find>failed_exams_list_dropdowns</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -176,8 +183,8 @@
     </option>
   </component>
   <component name="ProjectFrameBounds" extendedState="6">
-    <option name="x" value="1040" />
-    <option name="y" value="55" />
+    <option name="x" value="924" />
+    <option name="y" value="58" />
     <option name="width" value="842" />
     <option name="height" value="1010" />
   </component>
@@ -187,7 +194,6 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
-      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
@@ -199,10 +205,11 @@
           <select />
         </subPane>
       </pane>
+      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/calculator.py" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/Checkbox.py" />
     <property name="restartRequiresConfirmation" value="false" />
     <property name="settings.editor.selected.configurable" value="preferences.lookFeel" />
   </component>
@@ -290,14 +297,21 @@
       <option name="project" value="LOCAL" />
       <updated>1590590823878</updated>
     </task>
-    <option name="localTasksCounter" value="5" />
+    <task id="LOCAL-00005" summary="Added Timetable 80%">
+      <created>1590949682932</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1590949682932</updated>
+    </task>
+    <option name="localTasksCounter" value="6" />
     <servers />
   </component>
   <component name="ToolWindowManager">
     <frame x="-8" y="-8" width="1936" height="1056" extended-state="6" />
     <editor active="true" />
     <layout>
-      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.015806112" />
+      <window_info content_ui="combo" id="Project" order="0" weight="0.015806112" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
@@ -321,7 +335,8 @@
     <MESSAGE value="Added note.db and Record Card" />
     <MESSAGE value="Added hobby window" />
     <MESSAGE value="Added profile window and database reformat" />
-    <option name="LAST_COMMIT_MESSAGE" value="Added profile window and database reformat" />
+    <MESSAGE value="Added Timetable 80%" />
+    <option name="LAST_COMMIT_MESSAGE" value="Added Timetable 80%" />
   </component>
   <component name="editorHistoryManager">
     <entry file="file://$PROJECT_DIR$/createButtons.py">
@@ -331,13 +346,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="238">
           <caret line="16" column="30" selection-start-line="16" selection-start-column="30" selection-end-line="16" selection-end-column="30" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Checkbox.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="51">
-          <caret line="5" column="20" selection-start-line="5" selection-start-column="20" selection-end-line="5" selection-end-column="20" />
         </state>
       </provider>
     </entry>
@@ -351,17 +359,25 @@
     <entry file="file://$PROJECT_DIR$/grid.py">
       <provider selected="true" editor-type-id="text-editor" />
     </entry>
-    <entry file="file://$PROJECT_DIR$/FrameandRadiobuttons.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="153">
-          <caret line="10" column="14" selection-start-line="10" selection-start-column="14" selection-end-line="10" selection-end-column="14" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$USER_HOME$/AppData/Local/Programs/Python/Python37/Lib/tkinter/__init__.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="699">
           <caret line="2226" column="4" selection-start-line="2226" selection-start-column="4" selection-end-line="2226" selection-end-column="4" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/calculator.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-952" />
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/DropdownBoxes.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="391">
+          <caret line="25" selection-start-line="25" selection-end-line="25" />
+          <folding>
+            <element signature="e#0#21#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
@@ -372,6 +388,13 @@
           <folding>
             <element signature="e#0#21#0" expanded="true" />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/FrameandRadiobuttons.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="119">
+          <caret line="8" selection-start-line="6" selection-end-line="8" />
         </state>
       </provider>
     </entry>
@@ -388,6 +411,13 @@
           <folding>
             <element signature="e#0#21#0" expanded="true" />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/inputfields.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="85">
+          <caret line="5" selection-start-line="5" selection-end-line="6" selection-end-column="23" />
         </state>
       </provider>
     </entry>
@@ -417,27 +447,10 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/DropdownBoxes.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="414">
-          <caret line="25" selection-start-line="25" selection-end-line="25" />
-          <folding>
-            <element signature="e#0#21#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/inputfields.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="85">
-          <caret line="5" selection-start-line="5" selection-end-line="6" selection-end-column="23" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/CRUDdb.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="341">
-          <caret line="46" column="16" lean-forward="true" selection-start-line="38" selection-start-column="4" selection-end-line="46" selection-end-column="16" />
+        <state relative-caret-position="663">
+          <caret line="46" column="16" selection-start-line="38" selection-start-column="4" selection-end-line="46" selection-end-column="16" />
           <folding>
             <element signature="e#0#21#0" expanded="true" />
             <element signature="e#488#661#0" />
@@ -445,18 +458,20 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/calculator.py">
+    <entry file="file://$PROJECT_DIR$/Checkbox.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-952" />
+        <state relative-caret-position="221">
+          <caret line="15" column="12" selection-start-line="15" selection-start-column="12" selection-end-line="15" selection-end-column="12" />
+        </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/freeTime.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="17">
-          <caret line="654" column="13" selection-start-line="654" selection-start-column="13" selection-end-line="654" selection-end-column="13" />
+        <state relative-caret-position="309">
+          <caret line="286" column="12" selection-start-line="286" selection-start-column="12" selection-end-line="286" selection-end-column="12" />
           <folding>
             <element signature="e#0#21#0" expanded="true" />
-            <element signature="e#25482#27726#0" />
+            <element signature="e#35803#38047#0" />
           </folding>
         </state>
       </provider>
