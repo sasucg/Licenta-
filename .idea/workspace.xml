@@ -5,7 +5,6 @@
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/freeTime.py" beforeDir="false" afterPath="$PROJECT_DIR$/freeTime.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/users.db" beforeDir="false" afterPath="$PROJECT_DIR$/users.db" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/venv/pip-selfcheck.json" beforeDir="false" afterPath="$PROJECT_DIR$/venv/pip-selfcheck.json" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -18,21 +17,20 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/freeTime.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="309">
-              <caret line="286" column="12" selection-start-line="286" selection-start-column="12" selection-end-line="286" selection-end-column="12" />
+            <state relative-caret-position="292">
+              <caret line="1470" column="48" selection-start-line="1470" selection-start-column="48" selection-end-line="1470" selection-end-column="48" />
               <folding>
                 <element signature="e#0#21#0" expanded="true" />
-                <element signature="e#35803#38047#0" />
               </folding>
             </state>
           </provider>
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/Checkbox.py">
+        <entry file="file://$USER_HOME$/AppData/Local/Programs/Python/Python37/Lib/tkinter/constants.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="221">
-              <caret line="15" column="12" selection-start-line="15" selection-start-column="12" selection-end-line="15" selection-end-column="12" />
+            <state relative-caret-position="240">
+              <caret line="71" column="15" selection-start-line="71" selection-start-column="7" selection-end-line="71" selection-end-column="15" />
             </state>
           </provider>
         </entry>
@@ -131,36 +129,36 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>resiz</find>
-      <find>.close</find>
-      <find>commit_courses_of_day</find>
-      <find>login</find>
-      <find>cate</find>
-      <find>show_users_hob</find>
-      <find>current_courses</find>
-      <find>querry_courses</find>
-      <find>lambda x</find>
-      <find>lambda</find>
-      <find>today</find>
+      <find>email</find>
+      <find>formatul</find>
       <find>format</find>
-      <find>strptime</find>
-      <find>strf</find>
-      <find>timetable</find>
-      <find>get_current_semester</find>
-      <find>commit_cour</find>
-      <find>login_function</find>
-      <find>Examene</find>
-      <find>LabelFrame</find>
-      <find>show_current_courses</find>
-      <find>Entry</find>
-      <find>get_past_</find>
-      <find>UPDATE</find>
-      <find>commit_exams</find>
-      <find>ast.liter</find>
-      <find>print</find>
-      <find>get_current_failed_courses()</find>
-      <find>combobox</find>
-      <find>failed_exams_list_dropdowns</find>
+      <find>username</find>
+      <find>exists</find>
+      <find>len(username_register_input.get()) &lt; 6 or len(username_register_input.get()) &gt; 30:</find>
+      <find>missing</find>
+      <find>found</find>
+      <find>hash</find>
+      <find>bcrypt</find>
+      <find>if bcrypt.checkpw(attempt_password.encode(&quot;utf-8&quot;), hashpass_database[0]) == True:</find>
+      <find>if bcrypt.checkpw(attempt_password.encode(&quot;utf-8&quot;), hashpass_database[0].encode(&quot;utf-8&quot;)) == True:</find>
+      <find>logged_first</find>
+      <find>global logged</find>
+      <find>post_user_details</find>
+      <find>register</find>
+      <find>email_format</find>
+      <find>show_user_prof</find>
+      <find>get_profile_picture_from_database</find>
+      <find>show_user</find>
+      <find>profile</find>
+      <find>close_edit</find>
+      <find>Introdu</find>
+      <find>insert_hobby</find>
+      <find>Continu</find>
+      <find>post_top_bar_frame</find>
+      <find>schimb</find>
+      <find>change_firstname_button.</find>
+      <find>change_firstname_button</find>
+      <find>save_profile_changes</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -193,23 +191,10 @@
     <navigator proportions="" version="1">
       <foldersAlwaysOnTop value="true" />
     </navigator>
-    <panes>
-      <pane id="ProjectPane">
-        <subPane>
-          <expand>
-            <path>
-              <item name="LicentaSasu" type="b2602c69:ProjectViewProjectNode" />
-              <item name="LicentaSasu" type="462c0819:PsiDirectoryNode" />
-            </path>
-          </expand>
-          <select />
-        </subPane>
-      </pane>
-      <pane id="Scope" />
-    </panes>
+    <panes />
   </component>
   <component name="PropertiesComponent">
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/Checkbox.py" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/IconsAndImagesShow.py" />
     <property name="restartRequiresConfirmation" value="false" />
     <property name="settings.editor.selected.configurable" value="preferences.lookFeel" />
   </component>
@@ -304,7 +289,14 @@
       <option name="project" value="LOCAL" />
       <updated>1590949682932</updated>
     </task>
-    <option name="localTasksCounter" value="6" />
+    <task id="LOCAL-00006" summary="Added exams table and failures functionality">
+      <created>1591211473047</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1591211473047</updated>
+    </task>
+    <option name="localTasksCounter" value="7" />
     <servers />
   </component>
   <component name="ToolWindowManager">
@@ -336,7 +328,8 @@
     <MESSAGE value="Added hobby window" />
     <MESSAGE value="Added profile window and database reformat" />
     <MESSAGE value="Added Timetable 80%" />
-    <option name="LAST_COMMIT_MESSAGE" value="Added Timetable 80%" />
+    <MESSAGE value="Added exams table and failures functionality" />
+    <option name="LAST_COMMIT_MESSAGE" value="Added exams table and failures functionality" />
   </component>
   <component name="editorHistoryManager">
     <entry file="file://$PROJECT_DIR$/createButtons.py">
@@ -378,6 +371,23 @@
           <folding>
             <element signature="e#0#21#0" expanded="true" />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Checkbox.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="221">
+          <caret line="15" column="12" selection-start-line="15" selection-start-column="12" selection-end-line="15" selection-end-column="12" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$USER_HOME$/AppData/Local/Programs/Python/Python37/Lib/tkinter/messagebox.py">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$USER_HOME$/.PyCharmCE2018.3/system/python_stubs/-195174376/_sqlite3.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="223">
+          <caret line="151" column="8" selection-start-line="151" selection-start-column="8" selection-end-line="151" selection-end-column="8" />
         </state>
       </provider>
     </entry>
@@ -458,20 +468,19 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/Checkbox.py">
+    <entry file="file://$USER_HOME$/AppData/Local/Programs/Python/Python37/Lib/tkinter/constants.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="221">
-          <caret line="15" column="12" selection-start-line="15" selection-start-column="12" selection-end-line="15" selection-end-column="12" />
+        <state relative-caret-position="240">
+          <caret line="71" column="15" selection-start-line="71" selection-start-column="7" selection-end-line="71" selection-end-column="15" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/freeTime.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="309">
-          <caret line="286" column="12" selection-start-line="286" selection-start-column="12" selection-end-line="286" selection-end-column="12" />
+        <state relative-caret-position="292">
+          <caret line="1470" column="48" selection-start-line="1470" selection-start-column="48" selection-end-line="1470" selection-end-column="48" />
           <folding>
             <element signature="e#0#21#0" expanded="true" />
-            <element signature="e#35803#38047#0" />
           </folding>
         </state>
       </provider>
