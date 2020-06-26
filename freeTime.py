@@ -117,29 +117,11 @@ def register_database_function(event=None):
         registered_user_salt = bcrypt.gensalt()
         registered_user_hashpwd = bcrypt.hashpw(registered_user_pwd, registered_user_salt)
 
-        cursor.execute("INSERT INTO parole VALUES (:user_id, :salt , :hashpass)",
+        cursor.execute("INSERT INTO parole VALUES (:user_id, :hashpass)",
                     {
                     'user_id': registered_user_original_id[0],
-                    'salt': registered_user_salt.decode(),
                     'hashpass': registered_user_hashpwd.decode()
                     })
-
-        cursor.execute("INSERT INTO orar VALUES (:id_user, :luni, :marti, :miercuri, :joi, :vineri)",
-                       {
-                           'id_user': registered_user_original_id[0],
-                           'luni': None,
-                           'marti': None,
-                           'miercuri': None,
-                           'joi': None,
-                           'vineri': None,
-                       })
-
-        cursor.execute("INSERT INTO examene VALUES (:id_user, :lista_examene, :lista_restante)",
-                       {
-                           'id_user': registered_user_original_id[0],
-                           'lista_examene': None,
-                           'lista_restante': None
-                       })
 
         conn.commit()
         conn.close()
@@ -183,9 +165,9 @@ def login_function(event=None):
                 login_frame.grid_forget()
                 logged_in_function()
             else:
-                messagebox.showerror("Eroare!", "Datele introduse sunt invalide! Reincercati!")
+                messagebox.showerror("Eroare!", "Datele introduse sunt invalide! Reîncercați!")
         else:
-            messagebox.showerror("Eroare!", "Datele introduse sunt invalide! Reincercati!")
+            messagebox.showerror("Eroare!", "Datele introduse sunt invalide! Reîncercați!")
 
 
 
@@ -295,12 +277,12 @@ def commit_failures_to_database():
         conn = sqlite3.connect('users.db')
         cursor = conn.cursor()
 
-        cursor.execute("""UPDATE examene SET
-                               lista_restante = :lista
-                               WHERE id_user = :user_id""",
-                       {'lista': str(commited_failed_exams),
-                        'user_id': logged_original_id
-                        })
+        sql_delete = "DELETE from restante WHERE user_id=?"
+        cursor.execute(sql_delete, (logged_original_id,))
+        for failed in commited_failed_exams:
+            sql_insert = """INSERT INTO restante(user_id, materie, data) VALUES(?, ?, ?)"""
+            com_insert =  logged_original_id, failed[0], failed[1]
+            cursor.execute(sql_insert, com_insert)
 
         conn.commit()
         conn.close()
@@ -513,7 +495,7 @@ def commit_grades_database(course_dropdowns, user_past_courses):
 
     response = messagebox.showinfo("Saved!", "Modificarile au fost salvate!")
     if response == "ok":
-        buttons_available(exams_window, exams_button_menu)
+        buttons_available(grades_window, reportcard_button_menu)
 
 
 # Functia afiseaza pe grades_window materiile si notele pe care le-am obtinut, din trecut pana in prezent.
@@ -595,26 +577,15 @@ def get_hobbies_list_from_database():
     cursor = conn.cursor()
 
     selected_hobbies_from_database = []
-    sql_query = """SELECT hobbies_list FROM usershobbies WHERE id_user = ?"""
+    sql_query = """SELECT hobby, frecventa  FROM usershobbies WHERE id_user = ?"""
     cursor.execute(sql_query, (logged_original_id,))
-    hobbies_list_db = cursor.fetchone()
-    if hobbies_list_db != None:
-        standard_hobbies_list = ast.literal_eval(hobbies_list_db[0])
-    else:
-        standard_hobbies_list = []
+    hobbies_list_db = cursor.fetchall()
+    print(hobbies_list_db)
 
-    sql_query = """SELECT another_list FROM usershobbies WHERE id_user = ?"""
-    cursor.execute(sql_query, (logged_original_id,))
-    another_list_db = cursor.fetchone()
-    if another_list_db != None:
-        another_hobbies_list = ast.literal_eval(another_list_db[0])
-    else:
-        another_hobbies_list = []
+    standard_hobbies_list = []
+    for hobby in hobbies_list_db:
+        standard_hobbies_list.append([hobby[0], hobby[1]])
 
-    for another in another_hobbies_list:
-        standard_hobbies_list.append(another)
-    conn.commit()
-    conn.close()
     return standard_hobbies_list
 
 
@@ -708,31 +679,40 @@ def user_has_hobbies():
 def commit_hobbies():
     commited_selected_list = []
     i = 0
+
     for selected in selected_hobbies_list:
         denumire = get_hobby_name_from_database(selected)
         commited_selected_list.append([denumire, get_frequency_as_int(selected_hobbies_freq_combos[i].get())])
         i += 1
+
+    for another in another_hobbies_list:
+        commited_selected_list.append(another)
 
     user_hobbies_bool = user_has_hobbies()
     if len(selected_hobbies_list) + len(another_hobbies_list) == 4:
         if user_hobbies_bool == True:
             conn = sqlite3.connect('users.db')
             cursor = conn.cursor()
-            cursor.execute("""UPDATE usershobbies SET
-                        another_list = :listaanother,
-                        hobbies_list = :lista
-                        where id_user = :user_id""",
-                           {'listaanother': str(another_hobbies_list),
-                            'lista': str(commited_selected_list),
-                            'user_id': logged_original_id
-                            })
+            sql_delete = "DELETE from usershobbies WHERE id_user=?"
+            cursor.execute(sql_delete, (logged_original_id,))
+            for hobby in commited_selected_list:
+                cursor.execute("INSERT INTO usershobbies VALUES (:id_user, :hob, :frec)",
+                               {
+                                   'id_user': logged_original_id,
+                                   'hob': hobby[0],
+                                   'frec': hobby[1]
+                               })
             response = messagebox.showinfo("Info", "Modificările au fost salvate!")
 
             if response == "ok":
                 hobbies_edit_window.destroy()
-                for another in another_hobbies_list:
-                    commited_selected_list.append(another)
                 your_hobbies_frame.destroy()
+                try:
+                    session_program_window.destroy()
+                    messagebox.showinfo("Info!",
+                                        "Ocupațiile utilizatorului au fost schimbate, acest lucru duce la terminarea programului de sesiune")
+                except:
+                    pass
                 post_users_hobbies(commited_selected_list)
 
             conn.commit()
@@ -740,18 +720,18 @@ def commit_hobbies():
         else:
             conn = sqlite3.connect('users.db')
             cursor = conn.cursor()
-            cursor.execute("INSERT INTO usershobbies VALUES (:id_user, :listaanother, :lista)",
-                           {
-                               'id_user': logged_original_id,
-                               'listaanother': str(another_hobbies_list),
-                               'lista': str(commited_selected_list)
-                           })
-            response = messagebox.showinfo("Info", "Modificările au fost salvate!")
+            for hobby in commited_selected_list:
+                cursor.execute("INSERT INTO usershobbies VALUES (:id_user, :hob, :frec)",
+                               {
+                                   'id_user': logged_original_id,
+                                   'hob': hobby[0],
+                                   'frec': hobby[1]
+                               })
+            response = messagebox.showinfo("Info", "Modificările au fost salvate123!")
 
             if response == "ok":
+
                 hobbies_edit_window.destroy()
-                for another in another_hobbies_list:
-                    commited_selected_list.append(another)
                 try:
                     your_hobbies_frame.destroy()
                 except:
@@ -1017,10 +997,16 @@ def commit_courses_of_day(Day):
         conn = sqlite3.connect('users.db')
         cursor = conn.cursor()
         courses_list_for_day = sorted(courses_list_for_day, key = lambda x: int(x[2])) # Sortam lista de liste dupa ora de start a orei de curs
-        cursor.execute("UPDATE orar SET "+Day+"=:orar WHERE id_user = :oid",
-                    {'orar': str(courses_list_for_day),
-                    'oid': logged_original_id
-                    })
+
+        sql_delete = "DELETE from oredecurs where id_user = ? and zi = ?"
+        cursor.execute(sql_delete, (logged_original_id, Day))
+        print(Day)
+        for course in courses_list_for_day:
+            print(course)
+            sql_insert = """INSERT INTO oredecurs(id_user, zi, tip_curs, nume_curs, ora_inceput, ora_sfarsit) VALUES(?, ?, ?, ?, ?, ?)"""
+            com_insert = logged_original_id, Day.lower(), course[0], course[1], course[2], course[3]
+            cursor.execute(sql_insert, com_insert)
+
         messagebox.showinfo("Info", "Modificarile au fost salvate")
         conn.commit()
         conn.close()
@@ -1123,18 +1109,18 @@ def select_courses_for_timetable(day_frame, day):
     cursor = conn.cursor()
 
     linie = 0
-    sql_query = "SELECT "+day+" FROM orar WHERE id_user=?"
-    cursor.execute(sql_query, (logged_original_id,))
-    courses_from_database = cursor.fetchone()
-    courses_of_day = courses_from_database[0]
-
+    sql_query = "SELECT tip_curs, nume_curs, ora_inceput, ora_sfarsit FROM oredecurs WHERE id_user=? and zi = ?"
+    cursor.execute(sql_query, (logged_original_id,day))
+    courses_from_database = cursor.fetchall()
+    courses_of_day = []
+    for course in courses_from_database:
+        courses_of_day.append([course[0], course[1], course[2], course[3]])
     if courses_of_day == [] or courses_of_day == None:
         courses_not_found = Label(day_frame, text="Nu ati introdus valorile \n pentru ziua "+day.capitalize())
         courses_not_found.grid(row=0, column=0)
     else:
-        courses_of_day = ast.literal_eval(courses_of_day)
         for course in courses_of_day:
-            course_hours_label = Label(day_frame, text=course[2] + "-" + course[3])
+            course_hours_label = Label(day_frame, text=str(course[2]) + "-" + str(course[3]))
             course_hours_label.grid(row=linie, column=0)
             course_type_label = Label(day_frame, text=course[0])
             course_type_label.grid(row=linie, column=1)
@@ -1593,8 +1579,22 @@ def select_from_calendar(course_name, course_button):
     calendar_frame.config(text="Examen "+course_name)
 
     select_dateexam_button.config(state=NORMAL, command=select_exam_date)
-
-
+#
+#
+#
+#         conn = sqlite3.connect('users.db')
+#         cursor = conn.cursor()
+#
+#         sql_delete = "DELETE from restante WHERE user_id=?"
+#         cursor.execute(sql_delete, (logged_original_id,))
+#         for failed in commited_failed_exams:
+#             sql_insert = """INSERT INTO restante(user_id, materie, data) VALUES(?, ?, ?)"""
+#             com_insert =  logged_original_id, failed[0], failed[1]
+#             cursor.execute(sql_insert, com_insert)
+#
+#         conn.commit()
+#         conn.close()
+#         messagebox.showinfo('Info', "Restantele au fost salvate")
 def commit_exams_to_database():
     conn = sqlite3.connect('users.db')
     cursor = conn.cursor()
@@ -1605,20 +1605,24 @@ def commit_exams_to_database():
         exams_list.append([course, course_date_buttons[course_index]['text']])
         course_index += 1
 
-    cursor.execute("UPDATE examene SET lista_examene=:exams WHERE id_user = :oid",
-                   {'exams': str(exams_list),
-                    'oid': logged_original_id
-                    })
+    for exam in exams_list:
+        cursor.execute("UPDATE examene SET data=:date WHERE id_user = :oid and materie=:nume_materie",
+                       {'date': exam[1],
+                        'oid': logged_original_id,
+                        'nume_materie':exam[0]
+                        })
 
     failed_index = 0
     for failed in failed_list_from_database:
         failed[1] = failed_date_buttons[failed_index]['text']
         failed_index += 1
 
-    cursor.execute("UPDATE examene SET lista_restante=:failed_list WHERE id_user = :oid",
-                   {'failed_list': str(failed_list_from_database),
-                    'oid': logged_original_id
-                    })
+    for failed in failed_list_from_database:
+        cursor.execute("UPDATE restante SET data=:date WHERE user_id = :oid and materie=:nume_materie",
+                       {'date': failed[1],
+                        'oid': logged_original_id,
+                        'nume_materie':failed[0]
+                        })
     conn.commit()
     conn.close()
     messagebox.showinfo("Info", "Datele examnelor au fost salvate")
@@ -1630,38 +1634,42 @@ def get_exam_list_from_database(examen_type):
         conn = sqlite3.connect('users.db')
         cursor = conn.cursor()
 
-        cursor.execute("SELECT lista_examene FROM examene where id_user=?",(logged_original_id,))
-        exams_database = cursor.fetchone()
-
+        cursor.execute("SELECT materie, data FROM examene where id_user=?",(logged_original_id,))
+        exams_database = cursor.fetchall()
+        print(exams_database)
         conn.commit()
         conn.close()
-
-        if exams_database[0] != "" and exams_database[0] != None:
-            exams_list = []
-            exams_database = ast.literal_eval(exams_database[0])
-            for exams_course in exams_database:
-                exams_list.append(exams_course)
-            return exams_list
-        else:
+        try:
+            if exams_database[0][0] != None:
+                exams_list = []
+                for exams_course in exams_database:
+                    exams_list.append([exams_course[0], exams_course[1]])
+                print(exams_list)
+                return exams_list
+            else:
+                print("reached")
+                return []
+        except:
             return []
 
     if examen_type == "daterestante":
         conn = sqlite3.connect('users.db')
         cursor = conn.cursor()
 
-        sql_query = """SELECT lista_restante FROM examene WHERE id_user = ?"""
+        sql_query = """SELECT materie, data FROM restante WHERE user_id = ?"""
         cursor.execute(sql_query, (logged_original_id,))
-        failed_courses_database = cursor.fetchone()
+        failed_courses_database = cursor.fetchall()
         conn.commit()
         conn.close()
-
-        if failed_courses_database[0] != "" and failed_courses_database[0] != None:
-            failed_list = []
-            failed_courses_database = ast.literal_eval(failed_courses_database[0])
-            for failed_course in failed_courses_database:
-                failed_list.append(failed_course)
-            return failed_list
-        else:
+        try:
+            if failed_courses_database[0] != "" and failed_courses_database[0] != None:
+                failed_list = []
+                for failed_course in failed_courses_database:
+                    failed_list.append([failed_course[0], failed_course[1]])
+                return failed_list
+            else:
+                return []
+        except:
             return []
 
 
@@ -1673,12 +1681,10 @@ def initialize_exams_to_database():
     for course in current_courses:
         initial_dates.append([course, "--/--/--"])
 
-    cursor.execute("""UPDATE examene SET
-                                   lista_examene = :lista
-                                   WHERE id_user = :user_id""",
-                   {'lista': str(initial_dates),
-                    'user_id': logged_original_id
-                    })
+    for exam in initial_dates:
+        sql_insert = """INSERT INTO examene(id_user, materie, data) VALUES(?, ?, ?)"""
+        com_insert = logged_original_id, exam[0], exam[1]
+        cursor.execute(sql_insert, com_insert)
 
     conn.commit()
     conn.close()
@@ -1789,20 +1795,19 @@ def get_course_semester(course):
 
     conn.commit()
     conn.close()
-
     return int(semester_database[0][0])
 
-def check_session_program_availability(exams, faileds, semester):
+
+def check_program_availability(exams, faileds, semester):
     all_failed_dates = True
     all_exams_dates = True
-    user_hobby_bool = user_has_hobbies()
+
     for exam in exams:
         if exam[1] == "--/--/--":
             all_exams_dates = False
             break
     for failed in faileds:
         if failed[1] == "--/--/--":
-            print(failed[0])
             all_failed_dates = False
             break
 
@@ -1811,9 +1816,175 @@ def check_session_program_availability(exams, faileds, semester):
     else: return False
 
 
+def initialize_hobbies_lists(session_length):
+    global frar
+    global rar
+    global uneori
+    global des
+    global fdes
+    global hobby_max_posted
+    frar = []
+    rar = []
+    uneori = []
+    des = []
+    fdes = []
+    hobby_max_posted = 0
+    hobby_actual_freq = 0
+    for hobby in hobbies_list:
+        if hobby[1] == 1:
+            frar.append([hobby[0], 0, int(session_length/11)])
+            hobby_max_posted += int(session_length/11)
+        elif hobby[1] == 2:
+            rar.append([hobby[0], 0, int(session_length/8)])
+            hobby_max_posted += int(session_length / 8)
+        elif hobby[1] == 3:
+            uneori.append([hobby[0], 0, int(session_length/6)])
+            hobby_max_posted += int(session_length / 6)
+        elif hobby[1] == 4:
+            des.append([hobby[0], 0, int(session_length/4)])
+            hobby_max_posted += int(session_length / 4)
+        elif hobby[1] == 5:
+            fdes.append([hobby[0], 0, int(session_length/2)])
+            hobby_max_posted += int(session_length / 2)
+    print(frar)
+    print(rar)
+    print(uneori)
+    print(des)
+    print(fdes)
+
+
+def check_exam_day(date):
+    exams = []
+    checked = False
+    for exam in exams_list:
+        if date.day == exam[1].day and date.month == exam[1].month:
+            exams.append(exam[0])
+            checked = True
+    if checked == True:
+        return exams
+    else: return None
+
+import random
+def recap_day(label):
+    hobby_index = random.randint(0, 2)
+    label_text = Label(label, text="Recitire cursuri "+ exams_list[hobby_index][0])
+    label_text.pack()
+#
+
+def how_many_days_until_exam(date):
+    for exam in exams_list:
+        if exam[1].day > date.day and exam[1].month == date.month or exam[1].day < date.day and exam[1].month > date.month:
+            delta = exam[1] - date
+            return delta.days, exam[0]
+    return 0, 0
+
+
+def check_if_day_busy(date):
+    days_till_next = how_many_days_until_exam(date)
+    if days_till_next[0] == 1 or days_till_next[0] == 2:
+        return True
+    return False
+
+
+def get_formulare(type):
+    if type == "hobby":
+        forms = ["E timpul pentru", "E vremea pentru", "Ar merge niște", "Poate"]
+        rand = random.randint(0,3)
+        return forms[rand]
+    if type == "invatat":
+        forms = ["Aprofundare", "Laboratoare", "Seminarii", "Rezolvare modele examene"]
+        rand = random.randint(0, 3)
+        return forms[rand]
+
+
+def post_hobby(task_label):
+    global hobby_max_posted
+    global hobbies_posted
+    number_of_tasks = 0
+    for child in task_label.winfo_children():
+        number_of_tasks += 1
+    if number_of_tasks >= 3:
+        return
+    else:
+        posted = False
+        while posted == False and hobbies_posted != hobby_max_posted:
+            list_index = random.randint(1, 5)
+            if list_index == 1:
+                operate_list = frar
+            if list_index == 2:
+                operate_list = rar
+            if list_index == 3:
+                operate_list = uneori
+            if list_index == 4:
+                operate_list = des
+            if list_index == 5:
+                operate_list = fdes
+            if len(operate_list) != 0:
+                hobby_index = random.randint(0, (len(operate_list)-1))
+                if operate_list[hobby_index][1] < operate_list[hobby_index][2]:
+                    formulare = get_formulare("hobby")
+                    hobby_label = Label(task_label, text=formulare +" "+ operate_list[hobby_index][0].capitalize())
+                    hobby_label.pack()
+                    if list_index == 1:
+                        frar[hobby_index][1] += 1
+                    if list_index == 2:
+                        rar[hobby_index][1] += 1
+                    if list_index == 3:
+                        uneori[hobby_index][1] += 1
+                    if list_index == 4:
+                        des[hobby_index][1] += 1
+                    if list_index == 5:
+                        fdes[hobby_index][1] += 1
+                    posted = True
+
+                    hobbies_posted += 1
+
+
+def post_hobby_free(task_label):
+    posted = False
+    while posted == False:
+        list_index = random.randint(1, 5)
+        if list_index == 1:
+            operate_list = frar
+        if list_index == 2:
+            operate_list = rar
+        if list_index == 3:
+            operate_list = uneori
+        if list_index == 4:
+            operate_list = des
+        if list_index == 5:
+            operate_list = fdes
+        if len(operate_list) != 0:
+            hobby_index = random.randint(0, (len(operate_list) - 1))
+            formulare = get_formulare("hobby")
+            hobby_label = Label(task_label, text=formulare + " " + operate_list[hobby_index][0].capitalize())
+            hobby_label.pack()
+            if list_index == 1:
+                frar[hobby_index][1] += 1
+            if list_index == 2:
+                rar[hobby_index][1] += 1
+            if list_index == 3:
+                uneori[hobby_index][1] += 1
+            if list_index == 4:
+                des[hobby_index][1] += 1
+            if list_index == 5:
+                fdes[hobby_index][1] += 1
+            posted = True
+
+
+def post_busy(task_label):
+    number_of_tasks = 0
+    for child in task_label.winfo_children():
+        number_of_tasks += 1
+    if number_of_tasks >= 3:
+        return
+    else:
+        label = Label(task_label, text="Test")
+        label.pack()
+
 
 def show_session_program():
-    hobbies_list = get_hobbies_list_from_database()
+    global exams_list
     exams_list = get_exam_list_from_database("dateexamene")
     failed_list = get_exam_list_from_database("daterestante")
     current_semester = get_current_semester()
@@ -1822,34 +1993,15 @@ def show_session_program():
         useless_items = []
         for failed in failed_list:
             if get_course_semester(failed[0]) != current_semester:
-                print("Am sters "+failed[0]+"pentru ca are semestrul "+str(get_course_semester(failed[0])))
                 useless_items.append(failed_list.index(failed))
-            else:
-                print("NU am sters " + failed[0] + "pentru ca are semestrul " + str(get_course_semester(failed[0])))
         for useless in reversed(useless_items):
             failed_list.pop(useless)
-        print(failed_list)
 
-    program_availability = check_session_program_availability(exams_list, failed_list, current_semester)
-    print(int(str(int('08'))) > 20)
+    program_availability = check_program_availability(exams_list, failed_list, current_semester)
+
     if program_availability == False:
         messagebox.showinfo("Program sesiune!", "Pentru a accesa această funcționalitate trebuie să: \n -> introduceți toate datele examenelor, \n -> introduceți toate datele restanțelor semestrului curent, \n -> introduceți ocupațiile preferate.")
     else:
-        global session_program_window
-        session_program_window = Toplevel()
-        session_program_window.title("Program Sesiune")
-
-        session_program_welcome = Label(session_program_window, text="Programul tău pentru sesiune, semestrul "+str(current_semester), font=("Times New Roman", 17, "italic"), fg="#0099cc")
-        session_program_welcome.pack(pady=(10, 20))
-
-        session_button_menu.config(state=DISABLED)
-        session_program_window.protocol("WM_DELETE_WINDOW",
-                                        lambda: buttons_available(session_program_window, session_button_menu))
-
-        session_schedule_frame = LabelFrame(session_program_window)
-        session_schedule_frame.pack(fill="both")
-        # Lista de liste cu hobby si frecventa
-
         for exam in exams_list:
             date_str = exam[1]
             date_time_obj = datetime.strptime(date_str, '%d/%m/%y')
@@ -1870,22 +2022,161 @@ def show_session_program():
 
         session_length = (session_last_date - session_first_date).days + 1
 
-        print(len(exams_list))
+        if session_length > 30:
+            messagebox.showinfo("Program sesiune!", "O sesiune poate dura maxim 30 de zile!")
+            return
+        if session_length < 15:
+            messagebox.showinfo("Program sesiune!", "O sesiune dureaza minim 12 de zile!")
+            return
+        global hobbies_list
+        hobbies_list = get_hobbies_list_from_database()
+        hobbies_list = sorted(hobbies_list, key=lambda x: x[1])
+        initialize_hobbies_lists(session_length)
 
+        global session_program_window
+        session_program_window = Toplevel()
+        session_program_window.title("Program Sesiune")
+
+        session_program_welcome = Label(session_program_window, text="Programul tău pentru sesiune, semestrul "+str(current_semester), font=("Times New Roman", 17, "italic"), fg="#0099cc")
+        session_program_welcome.pack(pady=(10, 20))
+
+        session_button_menu.config(state=DISABLED)
+        session_program_window.protocol("WM_DELETE_WINDOW",
+                                        lambda: buttons_available(session_program_window, session_button_menu))
+
+        session_schedule_frame = LabelFrame(session_program_window)
+        session_schedule_frame.pack(fill="both")
+        # Lista de liste cu hobby si frecventa
+
+        session_days_frame = LabelFrame(session_schedule_frame, bd=0)
+        session_days_frame.pack()
         delta = timedelta(days=1)
+
+        days_of_session = []
+        free_days_session = []
+        busy_days_session = []
+        exams_day_session = []
+
         linie = 0
         col = 0
+        today = date.today()
+        session_day_index = 0
+        dates = []
+        tasks = []
         while session_first_date <= session_last_date:
-            print(session_first_date.strftime("%d-%m-%y"))
-            day_frame = LabelFrame(session_schedule_frame, text=session_first_date.strftime("%d-%m"))
-            day_frame.grid(row=linie, column=col)
-            text_label = LabelFrame(day_frame, text="TEST")
-            text_label.pack()
+            day_frame = LabelFrame(session_days_frame, text=session_first_date.strftime("%d-%m"))
+            day_frame.grid(row=linie, column=col, padx=50, pady=30)
+            days_of_session.append(day_frame)
+
+            dates.append(session_first_date)
+
+            day_tasks_label = Label(day_frame, width=32, height=5)
+            day_tasks_label.pack()
+            day_tasks_label.pack_propagate(False)
+            tasks.append(day_tasks_label)
+            if session_first_date.day == today.day and session_first_date.month == today.month:
+                day_frame.config(fg="#0099cc")
+
+            exam = check_exam_day(session_first_date)
+            if exam != None:
+                day_frame.config(fg="red")
+                for lilexam in exam:
+                    label = Label(day_tasks_label, text=lilexam)
+                    label.pack()
+                exams_day_session.append(day_frame)
+
+            if session_day_index < 3:
+                recap_day(day_tasks_label)
+
             col += 1
             if col == 5:
                 linie += 1
                 col =0
+            session_day_index += 1
             session_first_date += delta
+
+        session_day_index = len(days_of_session) - 1
+        i = 0
+        for day in reversed(days_of_session):
+            exam = check_exam_day(dates[session_day_index])
+            if exam != None:
+                for lilexam in exam:
+                    i = days_of_session.index(day)
+                    formulare_invatat = get_formulare("invatat")
+                    task_label = Label(tasks[i-1], text=formulare_invatat+" "+ lilexam)
+                    task_label.pack()
+                    formulare_invatat = get_formulare("invatat")
+                    task_label1 = Label(tasks[i-2], text=formulare_invatat+" "+ lilexam)
+                    task_label1.pack()
+                    formulare_invatat = get_formulare("invatat")
+                    task_label2 = Label(tasks[i-3], text=formulare_invatat+" "+ lilexam)
+                    task_label2.pack()
+
+            session_day_index -= 1
+
+        session_day_index = 0
+        for day in days_of_session:
+            busy = check_if_day_busy(dates[session_day_index])
+            if busy == True:
+                busy_days_session.append(day)
+            else:
+                free_days_session.append(day)
+            session_day_index += 1
+
+        global hobbies_posted
+        hobbies_posted = 0
+        for free in free_days_session:
+            post_hobby(tasks[days_of_session.index(free)])
+
+        for day in days_of_session:
+            task_label = tasks[days_of_session.index(day)]
+            number_of_tasks = 0
+            for child in task_label.winfo_children():
+                number_of_tasks += 1
+            if number_of_tasks == 0:
+                post_hobby_free(task_label)
+
+
+def check_program_semester_availability(monday_courses, tuesday_courses, wednesday_courses, thursday_courses, friday_courses):
+    if len(monday_courses) + len(tuesday_courses) + len(wednesday_courses) + len(thursday_courses) + len(
+            friday_courses) < 6:
+        return False
+    if len(monday_courses) + len(tuesday_courses) + len(wednesday_courses) + len(thursday_courses) + len(
+            friday_courses) > 18:
+        return False
+    if user_has_hobbies() == False:
+        return False
+
+
+def select_courses_for_semester_program(day):
+    print("orele de "+day+" sunt ")
+    conn = sqlite3.connect('users.db')
+    cursor = conn.cursor()
+    sql_query = "SELECT tip_curs, nume_curs, ora_inceput, ora_sfarsit FROM oredecurs WHERE id_user=? and zi = ?"
+    cursor.execute(sql_query, (logged_original_id,day))
+    courses_from_database = cursor.fetchall()
+    courses_of_day = []
+    for course in courses_from_database:
+        courses_of_day.append([course[0], course[1], course[2], course[3]])
+    print(courses_of_day)
+    return courses_of_day
+    conn.close()
+
+def show_semester_program():
+    monday_courses = select_courses_for_semester_program("luni")
+    tuesday_courses = select_courses_for_semester_program("marti")
+    wednesday_courses = select_courses_for_semester_program("miercuri")
+    thursday_courses = select_courses_for_semester_program("joi")
+    friday_courses = select_courses_for_semester_program("vineri")
+
+    program_availability = check_program_semester_availability(monday_courses, tuesday_courses, wednesday_courses, thursday_courses, friday_courses)
+
+    if program_availability == False:
+        messagebox.showinfo("Program semestru!",
+                            "Pentru a accesa această funcționalitate trebuie să: \n -> introduceți orarul săptămânal: nu puteți avea în total mai puțin de 6 ore de curs sau mai mult de 18 \n -> introduceți ocupațiile preferate.")
+    else:
+        print("ok")
+
 
 
 def post_top_bar_frame():
@@ -1947,7 +2238,7 @@ def logged_in_function():
     timetable_button_menu.grid(row=0, column=2, sticky="ew")
     hobbies_button_menu = Button(menu_frame, text="Hobbies", pady=83, padx=110, bd=0, command=show_users_hobbies)
     hobbies_button_menu.grid(row=1, column=0, sticky="ew", pady=10)
-    schedule_button_menu = Button(menu_frame, text="Program", pady=83, padx=110, bd=0)
+    schedule_button_menu = Button(menu_frame, text="Program", pady=83, padx=110, bd=0, command=show_semester_program)
     schedule_button_menu.grid(row=1, column=1, sticky="ew", padx=10, pady=10)
     session_button_menu = Button(menu_frame, text="Sesiune", pady=81, padx=90, bd=0, command=show_session_program)
     session_button_menu.grid(row=1, column=2, sticky="ew", pady=10)
@@ -2105,9 +2396,7 @@ def application_on():
     log_button_login = Button(login_frame, text="Autentificare", bd=1,command=login_function)
     log_button_login.grid(row=3, column=0, columnspan=2, ipadx=105, pady=5)
     register_button_login = Button(login_frame, text="Înregistrare", bd=1, command=register_frame_show)
-    register_button_login.grid(row=4, column=0)
-    forget_button_login = Button(login_frame, text="Recuperare parola", bd=1)
-    forget_button_login.grid(row=4, column=1, ipadx=38)
+    register_button_login.grid(row=4, column=0, columnspan=2, ipadx=110)
 
 
 application_on()

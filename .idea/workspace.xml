@@ -5,8 +5,6 @@
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/freeTime.py" beforeDir="false" afterPath="$PROJECT_DIR$/freeTime.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/users.db" beforeDir="false" afterPath="$PROJECT_DIR$/users.db" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/venv/Lib/site-packages/easy-install.pth" beforeDir="false" afterPath="$PROJECT_DIR$/venv/Lib/site-packages/easy-install.pth" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/venv/pip-selfcheck.json" beforeDir="false" afterPath="$PROJECT_DIR$/venv/pip-selfcheck.json" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -19,20 +17,11 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/freeTime.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="289">
-              <caret line="1853" column="30" lean-forward="true" selection-start-line="1853" selection-start-column="30" selection-end-line="1853" selection-end-column="30" />
+            <state relative-caret-position="337">
+              <caret line="1923" column="49" lean-forward="true" selection-start-line="1923" selection-start-column="49" selection-end-line="1923" selection-end-column="49" />
               <folding>
                 <element signature="e#0#21#0" expanded="true" />
               </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$USER_HOME$/AppData/Local/Programs/Python/Python37/Lib/tkinter/__init__.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="223">
-              <caret line="2765" selection-start-line="2765" selection-end-line="2765" />
             </state>
           </provider>
         </entry>
@@ -108,8 +97,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/CRUDdb.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="663">
-              <caret line="46" column="16" selection-start-line="38" selection-start-column="4" selection-end-line="46" selection-end-column="16" />
+            <state relative-caret-position="629">
+              <caret line="44" column="39" selection-start-line="44" selection-start-column="39" selection-end-line="44" selection-end-column="39" />
               <folding>
                 <element signature="e#0#21#0" expanded="true" />
                 <element signature="e#488#661#0" />
@@ -129,36 +118,36 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>get_current_semester</find>
-      <find>conn</find>
-      <find>SELECT</find>
-      <find>print</find>
-      <find>get_current_courses</find>
-      <find>show_current</find>
       <find>show_failed_courses</find>
-      <find>edit_failed_button</find>
-      <find>edit_failed_courses</find>
-      <find>add_failed_course</find>
-      <find>edit_courses_day</find>
-      <find>Modi</find>
-      <find>edit_cours</find>
-      <find>commit_courses_of_day</find>
-      <find>font=</find>
-      <find>commit_courses</find>
+      <find>initialize_exams_to_database</find>
+      <find>print</find>
+      <find>commit_exams_to_database</find>
+      <find>show_timetable</find>
+      <find>orar</find>
+      <find>bcrypt</find>
+      <find>register_database</find>
       <find>post_courses_to_timetable</find>
-      <find>sort</find>
-      <find>check_if_hours_valid</find>
-      <find>post_courses_to_timetable()</find>
-      <find>select_courses_for_timetable</find>
-      <find>login_func</find>
       <find>get_exam_list_from_database</find>
-      <find>check_session_program_availability</find>
-      <find>login_function</find>
-      <find>introduceți</find>
-      <find>user_has_hobb</find>
-      <find>sorted</find>
-      <find>AttributeError: type object 'datetime.datetime' has no attribute 'timedelta'</find>
+      <find>courses_from_database</find>
+      <find>select</find>
+      <find>select_courses</find>
+      <find>program_availability</find>
+      <find>show_semester</find>
+      <find>check_program_</find>
       <find>show_session</find>
+      <find>how_many_days_until_exam</find>
+      <find>check_exam_day</find>
+      <find>post_h</find>
+      <find>check_program_availability</find>
+      <find>show_users</find>
+      <find>edit_hobbies</find>
+      <find>show_sessi</find>
+      <find>initialize_hobbies_lists</find>
+      <find>get_formulare</find>
+      <find>commit_ho</find>
+      <find>show_sess</find>
+      <find>post_hobby</find>
+      <find>check_if_day_busy</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -303,11 +292,18 @@
       <option name="project" value="LOCAL" />
       <updated>1592424717371</updated>
     </task>
-    <option name="localTasksCounter" value="8" />
+    <task id="LOCAL-00008" summary="Finished orar, materii, examene, profil, carnet, started sesiune">
+      <created>1592938766756</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1592938766756</updated>
+    </task>
+    <option name="localTasksCounter" value="9" />
     <servers />
   </component>
   <component name="ToolWindowManager">
-    <frame x="-8" y="-8" width="1936" height="1056" extended-state="6" />
+    <frame x="-7" y="0" width="974" height="1047" extended-state="0" />
     <editor active="true" />
     <layout>
       <window_info content_ui="combo" id="Project" order="0" weight="0.015806112" />
@@ -315,7 +311,7 @@
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" weight="0.32936078" />
-      <window_info anchor="bottom" id="Run" order="2" sideWeight="0.49894625" weight="0.2426869" />
+      <window_info active="true" anchor="bottom" id="Run" order="2" sideWeight="0.49894625" visible="true" weight="0.26148796" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.3997833" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
@@ -337,7 +333,8 @@
     <MESSAGE value="Added Timetable 80%" />
     <MESSAGE value="Added exams table and failures functionality" />
     <MESSAGE value="Finished Profile and Materii" />
-    <option name="LAST_COMMIT_MESSAGE" value="Finished Profile and Materii" />
+    <MESSAGE value="Finished orar, materii, examene, profil, carnet, started sesiune" />
+    <option name="LAST_COMMIT_MESSAGE" value="Finished orar, materii, examene, profil, carnet, started sesiune" />
   </component>
   <component name="editorHistoryManager">
     <entry file="file://$PROJECT_DIR$/createButtons.py">
@@ -409,10 +406,34 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$USER_HOME$/AppData/Local/Programs/Python/Python37/Lib/tkinter/__init__.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="46954">
+          <caret line="2765" selection-start-line="2765" selection-end-line="2765" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/freeTime.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="337">
+          <caret line="1923" column="49" lean-forward="true" selection-start-line="1923" selection-start-column="49" selection-end-line="1923" selection-end-column="49" />
+          <folding>
+            <element signature="e#0#21#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/FrameandRadiobuttons.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="119">
           <caret line="8" selection-start-line="6" selection-end-line="8" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Browse.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="34">
+          <caret line="2" selection-start-line="2" selection-end-line="2" selection-end-column="30" />
         </state>
       </provider>
     </entry>
@@ -458,35 +479,11 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/CRUDdb.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="663">
-          <caret line="46" column="16" selection-start-line="38" selection-start-column="4" selection-end-line="46" selection-end-column="16" />
+        <state relative-caret-position="629">
+          <caret line="44" column="39" selection-start-line="44" selection-start-column="39" selection-end-line="44" selection-end-column="39" />
           <folding>
             <element signature="e#0#21#0" expanded="true" />
             <element signature="e#488#661#0" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Browse.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="34">
-          <caret line="2" selection-start-line="2" selection-end-line="2" selection-end-column="30" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$USER_HOME$/AppData/Local/Programs/Python/Python37/Lib/tkinter/__init__.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="223">
-          <caret line="2765" selection-start-line="2765" selection-end-line="2765" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/freeTime.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="289">
-          <caret line="1853" column="30" lean-forward="true" selection-start-line="1853" selection-start-column="30" selection-end-line="1853" selection-end-column="30" />
-          <folding>
-            <element signature="e#0#21#0" expanded="true" />
           </folding>
         </state>
       </provider>
