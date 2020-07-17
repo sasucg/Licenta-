@@ -5,8 +5,8 @@ from tkinter import messagebox, ttk, filedialog, tix
 from tkinter.tix import Balloon
 
 from PIL import ImageTk, Image
+
 import bcrypt
-import ast
 from tkcalendar import *
 
 import requests
@@ -249,10 +249,10 @@ def get_current_semester():
 
 # Functia cauta in baza de date materiile corespunzatoare: specializarii userului, anul si semestrul
 def get_current_courses(specialization, year, semester):
-    conn = sqlite3.connect('materii.db')
+    conn = sqlite3.connect('users.db')
     cursor = conn.cursor()
     courses_database_as_list = []
-    sql_query = """SELECT nume FROM materii WHERE specializare = ? AND an = ? AND semestru = ?"""
+    sql_query = """SELECT nume_materie FROM materii WHERE specializare_materie = ? AND an_materie = ? AND semestru_materie = ?"""
     cursor.execute(sql_query, (specialization, year, semester))
     courses_database = cursor.fetchall()
     for course in courses_database:
@@ -428,7 +428,7 @@ def show_failed_courses():
     failed_exams_list = get_exam_list_from_database("daterestante")
     if failed_exams_list != []:
         for failed_course in failed_exams_list:
-            failed_course_label = Label(failed_frame, text=failed_course[0])
+            failed_course_label = Label(failed_frame, text=failed_course[0], font=("Times New Roman", 12))
             failed_course_label.pack()
         edit_failed_button.pack()
     else:
@@ -660,7 +660,6 @@ def get_hobbies_list_from_database():
     sql_query = """SELECT hobby, frecventa  FROM usershobbies WHERE id_user = ?"""
     cursor.execute(sql_query, (logged_original_id,))
     hobbies_list_db = cursor.fetchall()
-    print(hobbies_list_db)
 
     standard_hobbies_list = []
     for hobby in hobbies_list_db:
@@ -887,7 +886,7 @@ def edit_hobbies():
         edit_hobbies_button.config(state=DISABLED)
     except:
         pass
-    welcome_pick_hobbies = Label(hobbies_edit_window, text="Alege sau introdu 4 ocupații preferate!", font=("Times new roman", 12), fg="#0099cc")
+    welcome_pick_hobbies = Label(hobbies_edit_window, text="Alege sau introdu 4 ocupații preferate!", font=("Times new roman", 13), fg="#0099cc")
     welcome_pick_hobbies.grid(row=0, column=0)
 
     global close_button
@@ -943,7 +942,7 @@ def edit_hobbies():
     global another_hobby_frame
     another_hobby_frame = LabelFrame(hobbies_edit_window)
     another_hobby_frame.grid(row=3, column=0)
-    another_hobby_label = Label(another_hobby_frame, text="Dacă hobby-ul tău nu se regăsește în lista de mai sus, îl poți introduce:")
+    another_hobby_label = Label(another_hobby_frame, text="Dacă hobby-ul tău nu se regăsește în lista de mai sus, îl poți introduce:", font=("Times new roman", 11))
     another_hobby_label.grid(row=0, column=0, columnspan=2)
     another_hobby_label_name = Label(another_hobby_frame, text="Denumire: ")
     another_hobby_label_name.grid(row=1, column=0)
@@ -959,11 +958,11 @@ def edit_hobbies():
     another_hobby_combobox_freq = ttk.Combobox(another_hobby_frame, value=possible_freq, width=47)
     another_hobby_combobox_freq.grid(row=2, column=1)
     another_hobby_combobox_freq.current(0)
-    another_hobby_button = Button(another_hobby_frame, text="Introdu", command=lambda: insert_hobby("another"))
+    another_hobby_button = Button(another_hobby_frame, text="Introdu", command=lambda: insert_hobby("another"), font=("Times New Roman", 10, "bold"))
     another_hobby_button.grid(row=0, column=2)
 
     global continue_button
-    continue_button = Button(hobbies_edit_window, text="Continuă", command=lambda: insert_hobby("selected"), state=DISABLED, padx=160)
+    continue_button = Button(hobbies_edit_window, text="Continuă", command=lambda: insert_hobby("selected"), state=DISABLED, padx=160, font=("Times New Roman", 10, "bold"))
     continue_button.grid(row=5, column=0, pady=(5,0))
 
 
@@ -983,9 +982,9 @@ def post_users_hobbies(hobbies_list):
             hobby_image.image = hobby_img_to_post
             hobby_image.grid(row=1, column=col)
 
-            hobby_text = Label(your_hobbies_frame, text=hobby[0])
+            hobby_text = Label(your_hobbies_frame, text=hobby[0], font=("Times New Roman", 12))
             hobby_text.grid(row=2, column=col)
-            hobby_frequency = Label(your_hobbies_frame, text=get_frequency_as_string(hobby[1]))
+            hobby_frequency = Label(your_hobbies_frame, text=get_frequency_as_string(hobby[1]), font=("Times New Roman", 11))
             hobby_frequency.grid(row=3, column=col)
             col += 1
         else:
@@ -1002,15 +1001,15 @@ def post_users_hobbies(hobbies_list):
                 hobby_image.image = hobby_img_to_post
                 hobby_image.grid(row=1, column=col)
 
-                hobby_text = Label(your_hobbies_frame, text=hobby[0])
+                hobby_text = Label(your_hobbies_frame, text=hobby[0], font=("Times New Roman", 12))
                 hobby_text.grid(row=2, column=col)
-                hobby_frequency = Label(your_hobbies_frame, text=get_frequency_as_string(hobby[1]))
+                hobby_frequency = Label(your_hobbies_frame, text=get_frequency_as_string(hobby[1]), font=("Times New Roman", 11))
                 hobby_frequency.grid(row=3, column=col)
                 col += 1
             except:
-                hobby_text = Label(your_hobbies_frame, text=hobby[0], width=30, height=10, bd=1)
+                hobby_text = Label(your_hobbies_frame, text=hobby[0], width=30, height=10, bd=1, font=("Times New Roman", 12))
                 hobby_text.grid(row=1, column=col)
-                hobby_frequency = Label(your_hobbies_frame, text=get_frequency_as_string(hobby[1]))
+                hobby_frequency = Label(your_hobbies_frame, text=get_frequency_as_string(hobby[1]), font=("Times New Roman", 11))
                 hobby_frequency.grid(row=3, column=col)
                 col += 1
     global edit_hobbies_button
@@ -1084,9 +1083,8 @@ def commit_courses_of_day(Day):
 
         sql_delete = "DELETE from oredecurs where id_user = ? and zi = ?"
         cursor.execute(sql_delete, (logged_original_id, Day.lower()))
-        print(Day)
+
         for course in courses_list_for_day:
-            print(course)
             sql_insert = """INSERT INTO oredecurs(id_user, zi, tip_curs, nume_curs, ora_inceput, ora_sfarsit) VALUES(?, ?, ?, ?, ?, ?)"""
             com_insert = logged_original_id, Day.lower(), course[0], course[1], course[2], course[3]
             cursor.execute(sql_insert, com_insert)
@@ -1102,58 +1100,61 @@ def commit_courses_of_day(Day):
 
 
 def add_course_for_edit():
-    if this_many_courses.get() != "" and int(this_many_courses.get()) <= 6:
+    try:
         number_of_courses_for_day = int(this_many_courses.get())
+        if this_many_courses.get() != "" and int(this_many_courses.get()) <= 6:
 
-        this_many_courses.destroy()
-        how_many_courses.destroy()
-        add_course_button.config(state=DISABLED)
-        save_course_button.config(state=NORMAL)
-        course_type_list = [
-            "Curs",
-            "Laborator",
-            "Seminar"
-        ]
-        # In locul lui 2 trebuei sa fie current_semester
-        current_semester = get_current_semester()
-        courses_list = get_current_courses(logged_specialization, logged_year, current_semester)
-        hours_start = [8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]
-        hours_over = [9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
+            this_many_courses.destroy()
+            how_many_courses.destroy()
+            add_course_button.config(state=DISABLED)
+            save_course_button.config(state=NORMAL)
+            course_type_list = [
+                "Curs",
+                "Laborator",
+                "Seminar"
+            ]
+            # In locul lui 2 trebuei sa fie current_semester
+            current_semester = get_current_semester()
+            courses_list = get_current_courses(logged_specialization, logged_year, current_semester)
+            hours_start = [8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]
+            hours_over = [9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
 
-        # Lista cursurilor dintr-o zi este globala pentru a putea fi salvata in baza de date in functia save_courses_of_day
-        global courses_drop_list_for_day
-        courses_drop_list_for_day = []
+            # Lista cursurilor dintr-o zi este globala pentru a putea fi salvata in baza de date in functia save_courses_of_day
+            global courses_drop_list_for_day
+            courses_drop_list_for_day = []
 
-        course_type_label = Label(edit_day_frame, text="Tipul orei")
-        course_type_label.grid(row=1, column=0, padx=(20, 20), pady=(30, 10))
-        course_name_label = Label(edit_day_frame, text="Numele orei")
-        course_name_label.grid(row=1, column=1, padx=(20, 20), pady=(30, 10))
-        course_hour_start_label = Label(edit_day_frame, text="Ora început")
-        course_hour_start_label.grid(row=1, column=2, padx=(20, 20), pady=(30, 10))
-        course_hour_over_label = Label(edit_day_frame, text="Ora sfârșit")
-        course_hour_over_label.grid(row=1, column=3, padx=(20, 20), pady=(30, 10))
+            course_type_label = Label(edit_day_frame, text="Tipul orei")
+            course_type_label.grid(row=1, column=0, padx=(20, 20), pady=(30, 10))
+            course_name_label = Label(edit_day_frame, text="Numele orei")
+            course_name_label.grid(row=1, column=1, padx=(20, 20), pady=(30, 10))
+            course_hour_start_label = Label(edit_day_frame, text="Ora început")
+            course_hour_start_label.grid(row=1, column=2, padx=(20, 20), pady=(30, 10))
+            course_hour_over_label = Label(edit_day_frame, text="Ora sfârșit")
+            course_hour_over_label.grid(row=1, column=3, padx=(20, 20), pady=(30, 10))
 
-        for i in range(0,number_of_courses_for_day):
-            course_type_drop = ttk.Combobox(edit_day_frame, value=course_type_list)
-            course_type_drop.grid(row=i+2, column=0, pady=(0, 20), padx=(20, 20))
-            course_type_drop.current(0)
+            for i in range(0,number_of_courses_for_day):
+                course_type_drop = ttk.Combobox(edit_day_frame, value=course_type_list)
+                course_type_drop.grid(row=i+2, column=0, pady=(0, 20), padx=(20, 20))
+                course_type_drop.current(0)
 
-            course_name_drop = ttk.Combobox(edit_day_frame, value=courses_list)
-            course_name_drop.grid(row=i+2, column=1, pady=(0, 20), padx=(20, 20))
-            course_name_drop.current(0)
+                course_name_drop = ttk.Combobox(edit_day_frame, value=courses_list)
+                course_name_drop.grid(row=i+2, column=1, pady=(0, 20), padx=(20, 20))
+                course_name_drop.current(0)
 
-            hour_start_drop = ttk.Combobox(edit_day_frame, value=hours_start)
-            hour_start_drop.grid(row=i+2, column=2, pady=(0, 20), padx=(20, 20))
-            hour_start_drop.current(0)
+                hour_start_drop = ttk.Combobox(edit_day_frame, value=hours_start)
+                hour_start_drop.grid(row=i+2, column=2, pady=(0, 20), padx=(20, 20))
+                hour_start_drop.current(0)
 
-            hour_over_drop = ttk.Combobox(edit_day_frame, value=hours_over)
-            hour_over_drop.grid(row=i+2, column=3, pady=(0, 20), padx=(20, 20))
-            hour_over_drop.current(0)
+                hour_over_drop = ttk.Combobox(edit_day_frame, value=hours_over)
+                hour_over_drop.grid(row=i+2, column=3, pady=(0, 20), padx=(20, 20))
+                hour_over_drop.current(0)
 
 
-            courses_drop_list_for_day.append([course_type_drop, course_name_drop, hour_start_drop, hour_over_drop])
+                courses_drop_list_for_day.append([course_type_drop, course_name_drop, hour_start_drop, hour_over_drop])
 
-    else:
+        else:
+            how_many_courses.config(fg="red")
+    except:
         how_many_courses.config(fg="red")
 
 
@@ -1200,15 +1201,15 @@ def select_courses_for_timetable(day_frame, day):
     for course in courses_from_database:
         courses_of_day.append([course[0], course[1], course[2], course[3]])
     if courses_of_day == [] or courses_of_day == None:
-        courses_not_found = Label(day_frame, text="Nu ati introdus valorile \n pentru ziua "+day.capitalize())
+        courses_not_found = Label(day_frame, text="Nu ati introdus valorile \n pentru ziua "+day.capitalize(), font=("times new roman", 11))
         courses_not_found.grid(row=0, column=0)
     else:
         for course in courses_of_day:
-            course_hours_label = Label(day_frame, text=str(course[2]) + "-" + str(course[3]))
+            course_hours_label = Label(day_frame, text=str(course[2]) + "-" + str(course[3]), font=("times new roman", 11))
             course_hours_label.grid(row=linie, column=0)
-            course_type_label = Label(day_frame, text=course[0])
+            course_type_label = Label(day_frame, text=course[0], font=("times new roman", 11))
             course_type_label.grid(row=linie, column=1)
-            course_name_label = Label(day_frame, text=course[1])
+            course_name_label = Label(day_frame, text=course[1], font=("times new roman", 11))
             course_name_label.grid(row=linie, column=2, sticky="E")
             linie += 1
 
@@ -1244,7 +1245,7 @@ def show_timetable():
     global thursday_frame
     global friday_frame
     monday_frame = LabelFrame(timetable_frame, font=("Halvetica", 20), padx=5, pady=5)
-    monday_frame.grid(row=1, column=0, pady=(0,20), sticky="n", padx=30)  # padding outside frame
+    monday_frame.grid(row=1, column=0, pady=(0,20), sticky="n", padx=30)
     tuesday_frame = LabelFrame(timetable_frame, font=("Halvetica", 20), padx=5, pady=5)
     tuesday_frame.grid(row=1, column=1, pady=(0, 20), sticky="n", padx=30)
     wednesday_frame = LabelFrame(timetable_frame, font=("Halvetica", 20), padx=5, pady=5)
@@ -1278,7 +1279,7 @@ def show_timetable():
 def browse_profile_picture():
     global profile_picture
     #root.filename returneaza calea catre ceea ce selectez, initialdir ce se deschide, filetypes e ce tipuri pot accepta si trebuie sa respecte patternul ("png files", "*.png")
-    root.filename = filedialog.askopenfilename(initialdir="C:/Users/lenovo/PycharmProjects/LicentaSasu/images", title="Select a file", filetypes=(("png files", "*.png"),("jpeg files","*.jpg"),("all files","*.*")))
+    root.filename = filedialog.askopenfilename(initialdir="C:/Users/lenovo/PycharmProjects/LicentaSasu/images", title="Select a file", filetypes=(("png files", "*.png"),("jpeg files","*.jpg")))
     if root.filename != "":
         conn = sqlite3.connect('users.db')
         cursor = conn.cursor()
@@ -1704,7 +1705,6 @@ def get_exam_list_from_database(examen_type):
 
         cursor.execute("SELECT materie, data FROM examene where id_user=?",(logged_original_id,))
         exams_database = cursor.fetchall()
-        print(exams_database)
         conn.commit()
         conn.close()
         try:
@@ -1712,10 +1712,8 @@ def get_exam_list_from_database(examen_type):
                 exams_list = []
                 for exams_course in exams_database:
                     exams_list.append([exams_course[0], exams_course[1]])
-                print(exams_list)
                 return exams_list
             else:
-                print("reached")
                 return []
         except:
             return []
@@ -1762,18 +1760,18 @@ def show_exams():
     global exams_window
     exams_window = Toplevel()
     exams_window.title("Examenele")
-    exams_welcome = Label(exams_window, text="Planificator Examene  ", font=("Times New Roman", 17, "italic"), fg="#0099cc")
+    exams_welcome = Label(exams_window, text="Planificator Examene  ", font=("Times New Roman", 16, "italic bold"), fg="#0099cc")
     exams_welcome.pack(pady=(10,20))
 
     exams_button_menu.config(state=DISABLED)
     exams_window.protocol("WM_DELETE_WINDOW", lambda: buttons_available(exams_window, exams_button_menu))
 
 
-    exams_frame = LabelFrame(exams_window)
+    exams_frame = LabelFrame(exams_window, bd=0)
     exams_frame.pack(side=LEFT, padx=(50,0), anchor=N)
-    course_welcome = Label(exams_frame, text="Examene", font=("Times New Roman", 12, "italic"), fg="#0099cc")
+    course_welcome = Label(exams_frame, text="Examene", font=("Times New Roman", 12, "italic bold"), fg="#0099cc")
     course_welcome.grid(row=1, column=0)
-    exam_date_welcome = Label(exams_frame, text="Dată examen", font=("Times New Roman", 12, "italic"), fg="#0099cc")
+    exam_date_welcome = Label(exams_frame, text="Dată examen", font=("Times New Roman", 12, "italic bold"), fg="#0099cc")
     exam_date_welcome.grid(row=1, column=1)
 
     current_semester = get_current_semester()
@@ -1788,7 +1786,7 @@ def show_exams():
     course_date_buttons = []
     linie = 2
     for course in current_courses:
-        course_text_label = Label(exams_frame, text=course)
+        course_text_label = Label(exams_frame, text=course, font=("Times New Roman", 11))
         course_text_label.grid(row=linie, column=0, sticky="w", pady=5)
 
         linie += 1
@@ -1814,19 +1812,19 @@ def show_exams():
     failed_list_from_database = get_exam_list_from_database("daterestante")
 
     if failed_list_from_database != []:
-        failed_frame = LabelFrame(exams_window)
+        failed_frame = LabelFrame(exams_window, bd=0)
         failed_frame.pack(side=RIGHT, padx=(0,30), anchor=N)
         global failed_date_buttons
         failed_date_buttons = []
-        failure_welcome = Label(failed_frame, text="Restanțe", font=("Times New Roman", 12, "italic"), fg="#0099cc")
+        failure_welcome = Label(failed_frame, text="Restanțe", font=("Times New Roman", 12, "italic bold"), fg="#0099cc")
         failure_welcome.grid(row=1, column=3)
-        failure_date_welcome = Label(failed_frame, text="Dată restanță", font=("Times New Roman", 12, "italic"), fg="#0099cc")
+        failure_date_welcome = Label(failed_frame, text="Dată restanță", font=("Times New Roman", 12, "italic bold"), fg="#0099cc")
         failure_date_welcome.grid(row=1, column=4)
 
         linie = 2
         col = 3
         for failed in failed_list_from_database:
-            failed_text_label = Label(failed_frame, text=failed[0], padx=20)
+            failed_text_label = Label(failed_frame, text=failed[0], padx=20, font=("Times New Roman", 11))
             failed_text_label.grid(row=linie, column=col, sticky="w", pady=5)
 
             failed_date_button = Button(failed_frame, text=failed[1], bd=1)
@@ -1869,8 +1867,6 @@ def get_course_semester(course):
 def check_program_availability(exams, faileds, semester):
     all_failed_dates = True
     all_exams_dates = True
-    print("lista examene check")
-    print(exams)
     for exam in exams:
         if exam[1] == "--/--/--":
             all_exams_dates = False
@@ -1915,11 +1911,6 @@ def initialize_hobbies_lists(session_length):
         elif hobby[1] == 5:
             fdes.append([hobby[0], 0, int(session_length/2)])
             hobby_max_posted += int(session_length / 2)
-    print(frar)
-    print(rar)
-    print(uneori)
-    print(des)
-    print(fdes)
 
 
 def check_exam_day(date):
@@ -1936,17 +1927,17 @@ def check_exam_day(date):
 def get_next_exams(date):
     exams = []
     for exam in exams_list:
-        if date.day > exam[1].day and date.month < exam[1].month or date.day < exam[1].day and date.month == exam[1].month:
-            exams.append(exam[0])
         if len(exams) == 2:
             return exams
+        if date.day > exam[1].day and date.month < exam[1].month or date.day < exam[1].day and date.month == exam[1].month:
+            exams.append(exam[0])
     return exams
 
 
 import random
 def recap_day(label):
     hobby_index = random.randint(0, 2)
-    label_text = Label(label, text="Recitire cursuri "+ exams_list[hobby_index][0])
+    label_text = Label(label, text="Recitire cursuri "+ exams_list[hobby_index][0], font=("Times new Roman", 10))
     label_text.pack()
 #
 
@@ -2018,7 +2009,7 @@ def post_hobby(task_label):
                 hobby_index = random.randint(0, (len(operate_list)-1))
                 if operate_list[hobby_index][1] < operate_list[hobby_index][2]:
                     formulare = get_formulare("hobby")
-                    hobby_label = Label(task_label, text=formulare +" "+ operate_list[hobby_index][0].capitalize())
+                    hobby_label = Label(task_label, text=formulare +" "+ operate_list[hobby_index][0].capitalize(), font=("Times new Roman", 10))
                     hobby_label.pack()
                     if list_index == 1:
                         frar[hobby_index][1] += 1
@@ -2056,7 +2047,7 @@ def post_hobby_semester(task_label):
             hobby_index = random.randint(0, (len(operate_list)-1))
             if operate_list[hobby_index][1] < operate_list[hobby_index][2]:
                 formulare = get_formulare("hobby")
-                hobby_label = Label(task_label, text=formulare +" "+ operate_list[hobby_index][0].capitalize())
+                hobby_label = Label(task_label, text=formulare +" "+ operate_list[hobby_index][0].capitalize(), font=("Times new Roman", 10))
                 hobby_label.pack()
                 if list_index == 1:
                     frar[hobby_index][1] += 1
@@ -2093,7 +2084,7 @@ def post_hobby_free(task_label):
         if len(operate_list) != 0:
             hobby_index = random.randint(0, (len(operate_list) - 1))
             formulare = get_formulare("hobby")
-            hobby_label = Label(task_label, text=formulare + " " + operate_list[hobby_index][0].capitalize())
+            hobby_label = Label(task_label, text=formulare + " " + operate_list[hobby_index][0].capitalize(), font=("Times new Roman", 10))
             hobby_label.pack()
             if list_index == 1:
                 frar[hobby_index][1] += 1
@@ -2134,12 +2125,9 @@ def show_session_program():
             failed_list.pop(useless)
 
     program_availability = check_program_availability(exams_list, failed_list, current_semester)
-    print(program_availability)
     if program_availability == False:
         messagebox.showinfo("Program sesiune!", "Pentru a accesa această funcționalitate trebuie să: \n -> introduceți toate datele examenelor, \n -> introduceți toate datele restanțelor semestrului curent, \n -> introduceți ocupațiile preferate.")
     else:
-        print("listă examene: ")
-        print(exams_list)
         for exam in exams_list:
             date_str = exam[1]
             date_time_obj = datetime.strptime(date_str, '%d/%m/%y')
@@ -2201,18 +2189,18 @@ def show_session_program():
         dates = []
         tasks = []
         while session_first_date <= session_last_date:
-            day_frame = LabelFrame(session_days_frame, text=session_first_date.strftime("%d-%m"))
-            day_frame.grid(row=linie, column=col, padx=50, pady=30)
+            day_frame = LabelFrame(session_days_frame, text=session_first_date.strftime("%d-%m"), font=("Times new Roman", 10, "bold"), fg="#0099cc")
+            day_frame.grid(row=linie, column=col, padx=36, pady=24)
             days_of_session.append(day_frame)
 
             dates.append(session_first_date)
 
-            day_tasks_label = Label(day_frame, width=32, height=5)
+            day_tasks_label = Label(day_frame, width=40, height=6)
             day_tasks_label.pack()
             day_tasks_label.pack_propagate(False)
             tasks.append(day_tasks_label)
             if session_first_date.day == today.day and session_first_date.month == today.month:
-                day_frame.config(fg="#0099cc")
+                day_frame.config(fg="green", font=("Times new Roman", 14, "bold"), text="Astăzi " + session_first_date.strftime("%d-%m"))
 
             exam = check_exam_day(session_first_date)
             if exam != None:
@@ -2240,13 +2228,13 @@ def show_session_program():
                 for lilexam in exam:
                     i = days_of_session.index(day)
                     formulare_invatat = get_formulare("invatat")
-                    task_label = Label(tasks[i-1], text=formulare_invatat+" "+ lilexam)
+                    task_label = Label(tasks[i-1], text=formulare_invatat+" "+ lilexam, font=("Times new Roman", 10))
                     task_label.pack()
                     formulare_invatat = get_formulare("invatat")
-                    task_label1 = Label(tasks[i-2], text=formulare_invatat+" "+ lilexam)
+                    task_label1 = Label(tasks[i-2], text=formulare_invatat+" "+ lilexam, font=("Times new Roman", 10))
                     task_label1.pack()
                     formulare_invatat = get_formulare("invatat")
-                    task_label2 = Label(tasks[i-3], text=formulare_invatat+" "+ lilexam)
+                    task_label2 = Label(tasks[i-3], text=formulare_invatat+" "+ lilexam, font=("Times new Roman", 10))
                     task_label2.pack()
 
             session_day_index -= 1
@@ -2274,11 +2262,22 @@ def show_session_program():
                 post_hobby_free(task_label)
             if number_of_tasks < 2:
                 next_two_exams = get_next_exams(dates[days_of_session.index(day)])
-                exam_index = random.randint(0, 1)
-                label_text = Label(task_label, text="Invață la " + next_two_exams[exam_index])
-                label_text.pack()
+                if len(next_two_exams) != 0:
+                    if len(next_two_exams) == 2:
+                        exam_index = random.randint(0, 1)
+                    else:
+                        exam_index = 0
+                    label_text = Label(task_label, text="Invață la " + next_two_exams[exam_index], font=("Times new Roman", 10))
+                    label_text.pack()
 
-
+        help_label = Label(session_program_window, text="?", bd=0, font=("Times New Roman", 17, "bold"), fg="#0099cc")
+        help_message_balon = Balloon(session_program_window)
+        help_message_balon.bind_widget(help_label,
+                                       balloonmsg="Modul de învățare de mai sus este doar sugerat. \n Utilizatorul poate alege dacă respectă acest ritm de aprofundare.")
+        help_label.pack(side=RIGHT, anchor=SE, padx=(0, 8))
+        help_message_balon.subwidget('message')['bg'] = 'white'
+        for sub in help_message_balon.winfo_children():
+            sub.config(bg='white')
 
 def check_program_semester_availability(monday_courses, tuesday_courses, wednesday_courses, thursday_courses, friday_courses):
     if len(monday_courses) + len(tuesday_courses) + len(wednesday_courses) + len(thursday_courses) + len(
@@ -2300,7 +2299,6 @@ def select_courses_for_semester_program(day):
     courses_of_day = []
     for course in courses_from_database:
         courses_of_day.append([course[0], course[1], course[2], course[3]])
-    print(courses_of_day)
     return courses_of_day
     conn.close()
 
@@ -2330,7 +2328,7 @@ def get_sleep_hour(tomorrow_courses):
 def post_study(courses, task):
     if courses != []:
         course_index = random.randint(0, len(courses)-1)
-        label_text = Label(task, text="Invață la "+ courses[course_index][1])
+        label_text = Label(task, text="Invață la "+ courses[course_index][1], font=("Times new Roman", 10))
         label_text.pack()
 
 
@@ -2398,7 +2396,7 @@ def show_semester_program():
 
             days_of_program.append(day_frame)
 
-            day_tasks_label = Label(day_frame, width=31, height=10)
+            day_tasks_label = Label(day_frame, width=31, height=13)
             day_tasks_label.pack()
             day_tasks_label.pack_propagate(False)
             tasks.append(day_tasks_label)
@@ -2458,15 +2456,21 @@ def show_semester_program():
                 next_courses2 = wednesday_courses
 
             if wakeup != None and int(wakeup) < 11:
-                wakeup_label = Label(tasks[days_of_program.index(day)], text=get_formulare("trezire") + wakeup)
+                wakeup_label = Label(tasks[days_of_program.index(day)], text=get_formulare("trezire") + wakeup, font=("Times new Roman", 10))
                 wakeup_label.pack()
             else:
-                wakeup_label = Label(tasks[days_of_program.index(day)], text=get_formulare("treziremaxim"))
+                wakeup_label = Label(tasks[days_of_program.index(day)], text=get_formulare("treziremaxim"), font=("Times new Roman", 10))
                 wakeup_label.pack()
 
             for course in courses:
-                course_label = Label(tasks[days_of_program.index(day)], text=str(course[2]) + " <-> " + str(course[3]) + " - " + course[0] + " - " +course[1])
-                course_label.pack()
+                if len(str(course[2]) + " - " + str(course[3]) + " - " + course[0] + " - " +course[1]) > 40:
+                    course_label = Label(tasks[days_of_program.index(day)],
+                                         text=str(course[2]) + " - " + str(course[3]) + " - " + course[0] + " - \n"  +
+                                              course[1], font=("Times new Roman", 10))
+                    course_label.pack()
+                else:
+                    course_label = Label(tasks[days_of_program.index(day)], text=str(course[2]) + " - " + str(course[3]) + " - " + course[0] + " - " +course[1], font=("Times new Roman", 10))
+                    course_label.pack()
 
             if days_of_program.index(day) == 5 or days_of_program.index(day) == 12 or days_of_program.index(day) == 19:
                 if len(monday_courses) >= 0:
@@ -2485,17 +2489,24 @@ def show_semester_program():
 
             if number_of_tasks < 4:
                 post_hobby_semester(tasks[days_of_program.index(day)])
-            print(hobbies_posted)
             if sleep != None:
-                sleep_label = Label(tasks[days_of_program.index(day)], text=get_formulare("culcare") + sleep)
+                sleep_label = Label(tasks[days_of_program.index(day)], text=get_formulare("culcare") + sleep, font=("Times new Roman", 10))
                 sleep_label.pack()
             else:
-                sleep_label = Label(tasks[days_of_program.index(day)], text=get_formulare("culcaremaxim"))
+                sleep_label = Label(tasks[days_of_program.index(day)], text=get_formulare("culcaremaxim"), font=("Times new Roman", 10))
                 sleep_label.pack()
             sleep = None
             wakeup = None
             courses = []
 
+        help_label = Label(semester_program_window, text="?", bd=0, font=("Times New Roman", 17, "bold"), fg="#0099cc")
+        help_message_balon = Balloon(semester_program_window)
+        help_message_balon.bind_widget(help_label,
+                                       balloonmsg="Toate activitățile de mai sus sunt sugerate. \nUtilizatorul poate alege dacă le respectă sau nu. \nDacă o zi are prea puține activități, utilizatorul poate alege singur ce activități să întreprindă.")
+        help_label.pack(side=RIGHT, anchor=SE, padx=(0, 8))
+        help_message_balon.subwidget('message')['bg'] = 'white'
+        for sub in help_message_balon.winfo_children():
+            sub.config(bg='white')
 
 
 def show_response(index, responses, questions):
@@ -2542,7 +2553,7 @@ def show_faq():
                  "Setarea avatarului",
                  ]
 
-    responses = ["Pentru a introduce ocupațiile trebuie să accesați butonul „Hobbies”. \n Apăsați butonul „Editează”. \n Acum aveți două modalități de introducere: \n\n - Selectarea ocupațiilor din lista standard: \n1. Selectați imaginile ocupațiilor din listă, \n 2. Apăsați „Continuare”, \n 3. Introduceti frecvența, \n \n- Introducerea ocupațiilor de la tastatură: \n 1. Introduceți numele ocupației, \n 2. Introduceți frecvența de practicare a acesteia, \n 3. Apăsați butonul ”Introdu”, \n 4. Apăsați „Continuare”. \n\n  Ați reușit să introduceți pasiunile preferate!",
+    responses = ["Pentru a introduce ocupațiile trebuie să accesați butonul „Hobbies”. \n Apăsați butonul „Editează”. \n Acum aveți două modalități de introducere: \n\n - Selectarea ocupațiilor din lista standard: \n1. Selectați imaginile ocupațiilor din listă, \n 2. Apăsați „Continuare”, \n 3. Introduceti frecvența, \n \n- Introducerea ocupațiilor de la tastatură: \n 1. Introduceți numele ocupației, \n 2. Introduceți frecvența de practicare a acesteia, \n 3. Apăsați butonul ”Introdu”, \n 4. Apăsați „aare”. \n\n  Ați reușit să introduceți pasiunile preferate!",
                  "Pentru a accesa programul de sesiune, aplicația necesită următoarele: \n 1. Toate datele examinelor \n 2. Toate datele restanțelor aferente semestrului curent \n 3. Patru ocupații preferate \n \n Introducerea datelor de la 1) și 2) se realizează accesând „Examene”. \n Introducerea ocupațiilor se realizează accesând „Hobbies”. ",
                  "Pentru a accesa programul pentru semestre, aplicația necesită următoarele:  \n 1. Orarul săptămânal al studentului. \n Numărul orelor de curs dintr-o săptămână trebuie să fie: \n - mai mare de 6, \n - mai mic de 18. \n 2. Patru ocupații preferate. \n \n Introducerea orarului se realizează accesând „Orar”. \n Introducerea ocupațiilor se realizează accesând „Hobbies”.",
                  "Datele examenelor sunt introduse cu ajutorul butonlui „Examene”: \n 1. Apăsați pe data aferentă examenului sau restanței, \n 2. Selectați data din calendar, \n 3. Apăsați butonul „Selectează” \n \n Acum data examenului a fost actualizată!",
