@@ -18,10 +18,10 @@ root = tix.Tk()
 root.title("Sas's Plan Program  ")
 root.iconbitmap('C:/Users/lenovo/PycharmProjects/LicentaSasu/Icon.ico')
 root.geometry("1400x800")
-root.resizable(False, False)
+# root.resizable(False, False)
 
 b_image = Image.open("C:/Users/lenovo/PycharmProjects/LicentaSasu/images/background/back1.jpg")
-b_image = b_image.resize((1400, 800), Image.ANTIALIAS)
+# b_image = b_image.resize((1400, 800), Image.ANTIALIAS)
 background_image = ImageTk.PhotoImage(b_image)
 background_label = Label(root, image=background_image)
 background_label.place(x=0, y=0, relwidth=1, relheight=1)
@@ -176,12 +176,35 @@ def login_function(event=None):
 def logout_function():
     response = messagebox.askyesno("Deconectare", "Doriți să vă deconectați?")
     if response == True:
-        logged_in_frame.destroy()
-        # profile_window.destroy()
-        # courses_window.destroy()
-        # hobbies_window.destroy()
-        # grades_window.destroy()
+        try:
+            profile_window.destroy()
+        except: pass
+        try:
+            courses_window.destroy()
+        except: pass
+        try:
+            hobbies_window.destroy()
+        except: pass
+        try:
+            grades_window.destroy()
+        except: pass
+        try:
+            timetable_window.destroy()
+        except: pass
+        try:
+            exams_window.destroy()
+        except: pass
+        try:
+            faq_window.destroy()
+        except: pass
+        try:
+            session_program_window.destroy()
+        except: pass
+        try:
+            semester_program_window.destroy()
+        except: pass
 
+        logged_in_frame.destroy()
         application_on()
         username_login_input.config(text="")
         password_login_input.config(text="")
@@ -247,9 +270,14 @@ def commit_failures_to_database():
         dropdowns_values.append(dropdown.get())
 
     error = ""
+    global past_courses
     for value in dropdowns_values:
         if value == "Stergere":
             error = "'Stergere' nu poate fi o restanta"
+            valid_failure = False
+            break
+        if value not in past_courses:
+            error = "Nu există materia "+ str(value)
             valid_failure = False
             break
 
@@ -259,11 +287,11 @@ def commit_failures_to_database():
             for value in dropdowns_values:
                 if value in failed_exams_values:
                     valid_failure = False
-                    error = "Nu puteti avea mai multe restante la aceeasi materie1"
+                    error = "Nu puteti avea mai multe restante la aceeasi materie! Reîncercați!"
                     break;
         else:
             valid_failure = False
-            error = "Nu puteti avea mai mutle restante la aceeasi materie2"
+            error = "Nu puteti avea mai mutle restante la aceeasi materie! Reîncercați!"
 
 
     if valid_failure == True:
@@ -309,19 +337,20 @@ def add_failed_course():
     semesters_shown = 0
     an = "I"
     semestru = 1
-    past = []
-    past.append("Stergere")
+    global past_courses
+    past_courses = []
+    past_courses.append("Stergere")
     while semesters_shown != semesters_to_show:
         if (logged_specialization == "Mate-Info" or logged_specialization == "Mate-Aplicata") and an == "I":
             user_past_courses = get_current_courses("Matematica", an, semestru)
             user_past_grades = get_grades_from_database(user_past_courses)
             for course in user_past_courses:
-                past.append(course)
+                past_courses.append(course)
         else:
             user_past_courses = get_current_courses(logged_specialization, an, semestru)
             user_past_grades = get_grades_from_database(user_past_courses)
             for course in user_past_courses:
-                past.append(course)
+                past_courses.append(course)
 
         semesters_shown += 1
         if semesters_shown == 2:
@@ -334,8 +363,8 @@ def add_failed_course():
         if semestru == 3:
             semestru = 1
 
-    failed_dropdown = ttk.Combobox(edit_failed_frame, value=past)
-    failed_dropdown.pack()
+    failed_dropdown = ttk.Combobox(edit_failed_frame, value=past_courses, width=28)
+    failed_dropdown.pack(anchor=W, padx=(8,0))
     failed_dropdown.current(0)
     failed_exams_list_dropdowns.append(failed_dropdown)
 
@@ -359,18 +388,18 @@ def delete_failed_course(vars):
 
 def edit_failed_courses():
     global edit_failed_frame
-    edit_failed_frame = LabelFrame(courses_window, text="Editare Restante")
+    edit_failed_frame = LabelFrame(courses_window, bd=0)
     edit_failed_frame.pack(fill="both")
     edit_failed_button.config(state=DISABLED)
 
     edit_options_failed = LabelFrame(edit_failed_frame, bd=0)
     edit_options_failed.pack()
     global save_failed_button
-    save_failed_button = Button(edit_options_failed, text="Salvează", bd=1, command=commit_failures_to_database)
+    save_failed_button = Button(edit_options_failed, text="Salvează", bd=1, command=commit_failures_to_database, font=("Times New Roman", 10, "bold"))
     save_failed_button.pack(side=LEFT)
-    add_failed = Button(edit_options_failed, text="Adăugare", command=add_failed_course, bd=1)
+    add_failed = Button(edit_options_failed, text="Adăugare", command=add_failed_course, bd=1, font=("Times New Roman", 10, "bold"))
     add_failed.pack(side=LEFT)
-    delete_failed = Button(edit_options_failed, text="Ștergere", bd=1, command=lambda: delete_failed_course(vars))
+    delete_failed = Button(edit_options_failed, text="Ștergere", bd=1, command=lambda: delete_failed_course(vars), font=("Times New Roman", 10, "bold"))
     delete_failed.pack(side=RIGHT)
 
     global failed_course_checkboxes
@@ -391,10 +420,10 @@ def show_failed_courses():
     global failed_frame
     failed_exams_list = []
     failed_exams_list_dropdowns = []
-    failed_frame = LabelFrame(courses_window, text="Restante", font=("Helvetica", 13))
+    failed_frame = LabelFrame(courses_window)
     failed_frame.pack(fill="both")
     global edit_failed_button
-    edit_failed_button = Button(failed_frame, text="Manager Restante", command=edit_failed_courses)
+    edit_failed_button = Button(failed_frame, text="Manager", command=edit_failed_courses, font=("Times New Roman", 10, "bold"))
 
     failed_exams_list = get_exam_list_from_database("daterestante")
     if failed_exams_list != []:
@@ -403,9 +432,9 @@ def show_failed_courses():
             failed_course_label.pack()
         edit_failed_button.pack()
     else:
-        no_failure_label = Label(failed_frame, text="Felicitări! Nu ai restanțe!")
+        no_failure_label = Label(failed_frame, text="Felicitări! Nu ai restanțe!", font=("Times New Roman", 12) )
         no_failure_label.pack()
-        edit_failed_button.config(text="Manager Restante")
+        edit_failed_button.config(text="Manager", font=("Times New Roman", 10, "bold"))
         edit_failed_button.pack()
 
 
@@ -422,17 +451,21 @@ def show_current_courses():
 
     current_semester = get_current_semester()
 
+    title_label = Label(courses_window, text="Materiile anului " + logged_year + ", semestrul " + str(current_semester), font=("Times New Roman", 16, "italic bold"), fg="#0099cc")
+    title_label.pack(pady=(20,4))
+
     if current_semester == 0:
-        summer = Label(courses_window, text="Vacanta placuta!", font=("Helvetica", 13))
+        summer = Label(courses_window, text="Vacanță plăcută!", font=("Times New Roman", 16, "italic bold"), fg="#0099cc")
         summer.pack()
     else:
         courses_database = get_current_courses(logged_specialization, logged_year, current_semester)
-        courses_frame = LabelFrame(courses_window, text="Materii An "+logged_year+", semestrul "+str(current_semester), font=("Helvetica", 13))
+        courses_frame = LabelFrame(courses_window, bd=0)
         courses_frame.pack(fill="both")
         for course in courses_database:
-            course_label = Label(courses_frame, text=course)
+            course_label = Label(courses_frame, text=course, font=("Times New Roman", 12))
             course_label.pack()
-
+        failed_title = Label(courses_window, text="Restanțe", font=("Times New Roman", 16, "italic bold"), fg="#0099cc")
+        failed_title.pack(pady=(20, 4))
         show_failed_courses()
 
 
@@ -474,28 +507,47 @@ def get_grades_from_database(user_past_courses):
 
 # Functia actualizeaza notele in baza de date
 def commit_grades_database(course_dropdowns, user_past_courses):
-    conn = sqlite3.connect('users.db')
-    cursor = conn.cursor()
+    grade_format = True
     commited_user_grades = []
-
     for i in range(0, len(user_past_courses)):
         commited_user_grades.append(course_dropdowns[i].get())
 
-    for i in range(len(user_past_courses)):
-        if commited_user_grades[i] != "-":
-            sql_delete = "DELETE from note WHERE id_user=? and nume_materie=?"
-            com_delete = logged_original_id, user_past_courses[i]
-            cursor.execute(sql_delete, com_delete)
-            sql_insert = """INSERT INTO note(id_user, nume_materie, nota) VALUES(?, ?, ?)"""
-            com_insert =  logged_original_id, user_past_courses[i], commited_user_grades[i]
-            cursor.execute(sql_insert, com_insert)
+    for grade in commited_user_grades:
+        if type(grade) is str and grade != "-":
+            try:
+                test = int(grade)
+            except:
+                grade_format = False
+                grade_error = grade
+                break
+        if grade != "-":
+            if int(grade) > 10 or int(grade) <= 0:
+                grade_format = False
+                grade_error = grade
+                break
 
-    conn.commit()
-    conn.close()
 
-    response = messagebox.showinfo("Saved!", "Modificarile au fost salvate!")
-    if response == "ok":
-        buttons_available(grades_window, reportcard_button_menu)
+    if grade_format == True:
+        conn = sqlite3.connect('users.db')
+        cursor = conn.cursor()
+        for i in range(len(user_past_courses)):
+            if commited_user_grades[i] != "-":
+                sql_delete = "DELETE from note WHERE id_user=? and nume_materie=?"
+                com_delete = logged_original_id, user_past_courses[i]
+                cursor.execute(sql_delete, com_delete)
+                sql_insert = """INSERT INTO note(id_user, nume_materie, nota) VALUES(?, ?, ?)"""
+                com_insert =  logged_original_id, user_past_courses[i], commited_user_grades[i]
+                cursor.execute(sql_insert, com_insert)
+
+
+        conn.commit()
+        conn.close()
+
+        response = messagebox.showinfo("Saved!", "Modificarile au fost salvate!")
+        if response == "ok":
+            buttons_available(grades_window, reportcard_button_menu)
+    else:
+        messagebox.showerror("Eroare!", "Nu există nota " + grade_error+ "! \n Reîncercați!")
 
 
 # Functia afiseaza pe grades_window materiile si notele pe care le-am obtinut, din trecut pana in prezent.
@@ -503,10 +555,17 @@ def show_report_card():
     global grades_window
     grades_window = Toplevel()
     grades_window.title("Carnet de note")
-
+    grades_window.geometry("450x900")
     reportcard_button_menu.config(state=DISABLED)
     grades_window.protocol("WM_DELETE_WINDOW", lambda: buttons_available(grades_window, reportcard_button_menu))
 
+    canvas = Canvas(grades_window)
+    scroll_y = Scrollbar(grades_window, orient="vertical", command=canvas.yview)
+
+    frame = Frame(canvas)
+    frame.pack()
+    title = Label(frame, text="Notele mele", font=("Times New Roman", 16, "italic bold"), fg="#0099cc")
+    title.grid(row=0, column=0, columnspan=2, pady=(10,10))
     current_semester = get_current_semester() # Aflam semestrul in care suntem
     current_year = get_year_as_int(logged_year) # Luam anul in care suntem ca int
 
@@ -523,11 +582,13 @@ def show_report_card():
     an = "I"
     semestru = 1
     past = []
-    linie = 0 # Linia ne ajuta la postarea elementelor in fereastra
-
+    linie = 1 # Linia ne ajuta la postarea elementelor in fereastra
+    suma = 0
+    numar_materii = 0
+    check_medie = True
     while semesters_shown != semesters_to_show:
-        label = Label(grades_window, text="Anul "+an+" semestrul "+str(semestru), font=("Times New Roman", 15, "italic"), fg="#0099cc")
-        label.grid(row=linie, column=0, columnspan=2)
+        label = Label(frame, text="Anul "+an+" semestrul "+str(semestru), font=("Times New Roman", 15, "italic"), fg="#0099cc")
+        label.grid(row=linie, column=0, columnspan=2, pady=(20,5))
         linie += 1
 
         if (logged_specialization == "Mate-Info" or logged_specialization == "Mate-Aplicata") and an == "I":
@@ -542,18 +603,28 @@ def show_report_card():
                 past.append(course)
 
         for i in range(0, len(user_past_courses)):  # Pentru fiecare curs, il postam in stanga si nota acestuia in dreapta
-            course_text_label = Label(grades_window, text=user_past_courses[i])
+            course_text_label = Label(frame, text=user_past_courses[i], font=("Times new roman", 11))
             course_text_label.grid(row=linie, column=0, sticky="w", padx=(10,5))
 
-            course_dropdown = ttk.Combobox(grades_window, value=note)
+            course_dropdown = ttk.Combobox(frame, value=note)
             if user_past_grades[i] == None:
                 course_dropdown.current(0)
+                check_medie = False
             else:
+                suma += user_past_grades[i]
+                numar_materii += 1
                 course_dropdown.current(user_past_grades[i])
 
             course_dropdown.grid(row=linie, column=1, padx=(0,10))
             course_dropdowns.append(course_dropdown)
             linie += 1
+        if check_medie == True and semesters_shown % 2 != 0:
+            medie = round(suma / numar_materii, 2)
+            numar_credite = Label(frame, text="Medie an " + an + " " + str(medie), font=("Times new roman", 12, "underline"))
+            numar_credite.grid(row=linie, column=0, sticky="W", padx=(10,5))
+            linie += 1
+            suma = 0
+            numar_materii = 0
 
         semesters_shown += 1
         if semesters_shown == 2:
@@ -566,9 +637,18 @@ def show_report_card():
         if semestru == 3:
             semestru = 1
 
-    save_changes = Button(grades_window, text="Salvează", command=lambda: commit_grades_database(course_dropdowns, past), padx=150, bd=1)
+    save_changes = Button(frame, text="Salvează", command=lambda: commit_grades_database(course_dropdowns, past), padx=150, bd=1, font=("Times New Roman", 10, "bold"))
     save_changes.grid(row=linie+1, column=0, columnspan=2, pady=20)
 
+    canvas.create_window(0, 0, anchor='nw', window=frame)
+    # make sure everything is displayed before configuring the scrollregion
+    canvas.update_idletasks()
+
+    canvas.configure(scrollregion=canvas.bbox('all'),
+                     yscrollcommand=scroll_y.set)
+
+    canvas.pack(fill='both', expand=True, side='left')
+    scroll_y.pack(fill='y', side='right')
 
 
 # Functia intoarce hobbyurile unui user, folosita pentru a afisa hobbyurile care au fost selectate in trecut
@@ -767,26 +847,28 @@ def insert_hobby(type):
     if type == "selected":
         another_hobby_frame.grid_forget()
 
-        global selected_hobbies_freq_combos
-        selected_hobbies_freq_combos = []
-        c = 0
-        for but in hobby_images_button_list:
-            if hobby_images_button_list.index(but) not in selected_hobbies_list:
-                but.grid_forget()
-            else:
-                but.grid(row=0, column=c)
-                but.config(command=NONE)
-                denumire = get_hobby_name_from_database(hobby_images_button_list.index(but))
-                label = Label(hobbies_list_frame, text=denumire)
-                label.grid(row=1, column=c)
-                combo = ttk.Combobox(hobbies_list_frame, value=["Foarte rar", "Rar", "Uneori", "Des", "Foarte des"])
-                combo.grid(row=2, column=c)
-                combo.current(0)
-                selected_hobbies_freq_combos.append(combo)
-            c += 1
-
-        continue_button.config(command=commit_hobbies)
-
+        if len(another_hobbies_list) != 4:
+            hobbies_edit_window.pack_configure(padx=315)
+            global selected_hobbies_freq_combos
+            selected_hobbies_freq_combos = []
+            c = 0
+            for but in hobby_images_button_list:
+                if hobby_images_button_list.index(but) not in selected_hobbies_list:
+                    but.grid_forget()
+                else:
+                    but.grid(row=0, column=c)
+                    but.config(command=NONE)
+                    denumire = get_hobby_name_from_database(hobby_images_button_list.index(but))
+                    label = Label(hobbies_list_frame, text=denumire)
+                    label.grid(row=1, column=c)
+                    combo = ttk.Combobox(hobbies_list_frame, value=["Foarte rar", "Rar", "Uneori", "Des", "Foarte des"])
+                    combo.grid(row=2, column=c)
+                    combo.current(0)
+                    selected_hobbies_freq_combos.append(combo)
+                c += 1
+            continue_button.config(command=commit_hobbies)
+        else:
+            commit_hobbies()
 
 def close_edit(type):
     if type == "hobby":
@@ -805,13 +887,15 @@ def edit_hobbies():
         edit_hobbies_button.config(state=DISABLED)
     except:
         pass
-    welcome_pick_hobbies = Label(hobbies_edit_window, text="Alege sau introdu 4 ocupații preferate!", font=("Helvetica", 12))
+    welcome_pick_hobbies = Label(hobbies_edit_window, text="Alege sau introdu 4 ocupații preferate!", font=("Times new roman", 12), fg="#0099cc")
     welcome_pick_hobbies.grid(row=0, column=0)
 
     global close_button
     close_button = Button(hobbies_edit_window, text="X", command=lambda: close_edit("hobby"), padx=10, bd=1, font=("Helvetica", 10, "bold"))
     close_button.grid(row=0, column=0, sticky="E", pady=(0,10))
-
+    global hobbies_list
+    if len(hobbies_list) == 0:
+        close_button.config(state=DISABLED)
     close_button.bind("<Enter>", hover)
     close_button.bind("<Leave>", leave)
 
@@ -888,8 +972,6 @@ def post_users_hobbies(hobbies_list):
     your_hobbies_frame = LabelFrame(hobbies_window)
     your_hobbies_frame.pack(padx=315, pady=(10,10))
 
-    your_hobbies_label = Label(your_hobbies_frame, text="Ocupații preferate:")
-    your_hobbies_label.grid(row=0, column=0)
     col = 0
     for hobby in hobbies_list:
         img_index = get_hobby_id_from_database(hobby[0])
@@ -931,9 +1013,8 @@ def post_users_hobbies(hobbies_list):
                 hobby_frequency = Label(your_hobbies_frame, text=get_frequency_as_string(hobby[1]))
                 hobby_frequency.grid(row=3, column=col)
                 col += 1
-
     global edit_hobbies_button
-    edit_hobbies_button = Button(your_hobbies_frame, text="Editează", command=edit_hobbies, padx=160, bd=1)
+    edit_hobbies_button = Button(your_hobbies_frame, text="Editează", command=edit_hobbies, padx=160, bd=1, font=("Times New Roman", 10, "bold"))
     edit_hobbies_button.grid(row=4, column=0, columnspan=4, pady=(5,0))
 
 
@@ -944,6 +1025,9 @@ def show_users_hobbies():
 
     hobbies_button_menu.config(state=DISABLED)
     hobbies_window.protocol("WM_DELETE_WINDOW", lambda: buttons_available(hobbies_window, hobbies_button_menu))
+
+    your_hobbies_label = Label(hobbies_window, text="Ocupații preferate:", font=("Times New Roman", 16, "italic bold"), fg="#0099cc")
+    your_hobbies_label.pack()
 
     global hobbies_list
     hobbies_list = get_hobbies_list_from_database()
@@ -999,7 +1083,7 @@ def commit_courses_of_day(Day):
         courses_list_for_day = sorted(courses_list_for_day, key = lambda x: int(x[2])) # Sortam lista de liste dupa ora de start a orei de curs
 
         sql_delete = "DELETE from oredecurs where id_user = ? and zi = ?"
-        cursor.execute(sql_delete, (logged_original_id, Day))
+        cursor.execute(sql_delete, (logged_original_id, Day.lower()))
         print(Day)
         for course in courses_list_for_day:
             print(course)
@@ -1081,7 +1165,7 @@ def edit_courses_day(Day):
     edit_day_frame.pack()
 
     global save_course_button
-    save_course_button = Button(edit_day_frame, text="Salvează", state=DISABLED, command=lambda: commit_courses_of_day(Day), padx=70)
+    save_course_button = Button(edit_day_frame, text="Salvează", state=DISABLED, command=lambda: commit_courses_of_day(Day), padx=70, font=("Times New Roman", 10, "bold"))
     save_course_button.grid(row=0, column=3, padx=(20,20))
 
     edit_day_label = Label(edit_day_frame, text="Editează materiile de "+Day)
@@ -1097,7 +1181,7 @@ def edit_courses_day(Day):
     this_many_courses.grid(row=1, column=1)
 
     global add_course_button
-    add_course_button = Button(edit_day_frame, text="Adaugă în orarul de " + Day, command=add_course_for_edit)
+    add_course_button = Button(edit_day_frame, text="Adaugă în orarul de " + Day, command=add_course_for_edit, font=("Times New Roman", 10, "bold"))
     add_course_button.grid(row=0, column=0, padx=(20,20))
 
 
@@ -1147,7 +1231,7 @@ def show_timetable():
 
     timetable_button_menu.config(state=DISABLED)
     timetable_window.protocol("WM_DELETE_WINDOW", lambda: buttons_available(timetable_window, timetable_button_menu))
-    timetable_welcome = Label(timetable_window, text="Orarul meu", font=("Times New Roman", 20, "italic"), fg="#0099cc")
+    timetable_welcome = Label(timetable_window, text="Orarul meu", font=("Times New Roman", 17, "italic bold"), fg="#0099cc")
     timetable_welcome.pack(pady=(10,10))
 
     global timetable_frame
@@ -1207,9 +1291,9 @@ def browse_profile_picture():
         picture = Image.open(root.filename)
         picture = picture.resize((400, 350), Image.ANTIALIAS)
         profile_picture = ImageTk.PhotoImage(picture)
-        profile_picture_label = Label(profile_window, image=profile_picture)
+        profile_picture_label = Label(user_details_frame, image=profile_picture)
         profile_picture_label.image = profile_picture
-        profile_picture_label.grid(row=1, column=2, rowspan=9, padx=(130, 0))
+        profile_picture_label.grid(row=1, column=2, rowspan=9, padx=(130, 40))
 
         conn.commit()
         conn.close()
@@ -1229,7 +1313,7 @@ def get_profile_picture_from_database():
 
     profile_picture_label = Label(user_details_frame, image=profile_picture)
     profile_picture_label.image = profile_picture
-    profile_picture_label.grid(row=1, column=2, rowspan=9, padx=(130, 0))
+    profile_picture_label.grid(row=1, column=2, rowspan=9, padx=(130, 40))
 
     conn.commit()
     conn.close()
@@ -1366,7 +1450,7 @@ def change_handler(type):
     change_entry_s = Entry(change_frame, width=50)
     change_entry_s.grid(row=1, column=1)
 
-    save_changes_button = Button(change_frame, text="Salveaza", padx=50)
+    save_changes_button = Button(change_frame, text="Salveaza", padx=50, font=("Times New Roman", 10, "bold"))
     save_changes_button.grid(row=2, column=0, columnspan=2, pady=(10,3))
 
     if type == "username":
@@ -1502,7 +1586,7 @@ def edit_user_profile():
     pass_entry = Entry(check_pass_frame, width=50, show="*")
     pass_entry.pack()
 
-    confirm_button = Button(check_pass_frame, text="Confirmă", command=lambda: check_edit_pass(pass_entry.get()))
+    confirm_button = Button(check_pass_frame, text="Confirmă", padx=30, command=lambda: check_edit_pass(pass_entry.get()), font=("Times New Roman", 10, "bold"))
     confirm_button.pack()
 
 
@@ -1516,39 +1600,37 @@ def post_user_details():
     profile_welcome_frame = LabelFrame(user_details_frame, bd=0)
     profile_welcome_frame.grid(row=0, column=1, columnspan=2, padx=(0, 140))
     profile_welcome = Label(user_details_frame,
-                            text="Bine ai venit pe profilul tau! \n Mai jos sunt informatiile aferente contului tau.",
-                            font=("Helvetica", 11))
-    profile_welcome.grid(row=0, column=0, columnspan=2, pady=20)
+                            text="Bine ai venit pe profilul tău!",
+                            font=("Times New Roman", 16, "italic bold"), fg="#0099cc")
+    profile_welcome.grid(row=0, column=0, columnspan=3, pady=20)
 
-    first_name_profile_label = Label(user_details_frame, text="Prenume: " + logged_first_name, anchor="w")
+    first_name_profile_label = Label(user_details_frame, text="Prenume: " + logged_first_name, font=("Times New Roman", 11, "bold"))
     first_name_profile_label.grid(row=1, column=0, padx=(40, 0), sticky="W")
-    last_name_profile_label = Label(user_details_frame, text="Nume: " + logged_last_name)
+    last_name_profile_label = Label(user_details_frame, text="Nume: " + logged_last_name, font=("Times New Roman", 11, "bold"))
     last_name_profile_label.grid(row=2, column=0, padx=(40, 0), sticky="W")
-    username_profile_label = Label(user_details_frame, text="Username: " + logged_username)
+    username_profile_label = Label(user_details_frame, text="Username: " + logged_username, font=("Times New Roman", 11, "bold"))
     username_profile_label.grid(row=3, column=0, padx=(40, 0), sticky="W")
-    email_profile_label = Label(user_details_frame, text="Email: " + logged_email)
+    email_profile_label = Label(user_details_frame, text="Email: " + logged_email, font=("Times New Roman", 11, "bold"))
     email_profile_label.grid(row=4, column=0, padx=(40, 0), sticky="W")
-    join_date_label = Label(user_details_frame, text="Data înregistrarii: " + logged_join_date)
+    join_date_label = Label(user_details_frame, text="Data înregistrarii: " + logged_join_date, font=("Times New Roman", 11, "bold"))
     join_date_label.grid(row=5, column=0, padx=(40, 0), sticky="W")
-    program_profile_label = Label(user_details_frame, text="Program de studiu: " + logged_program)
+    program_profile_label = Label(user_details_frame, text="Program de studiu: " + logged_program, font=("Times New Roman", 11, "bold"))
     program_profile_label.grid(row=6, column=0, padx=(40, 0), sticky="W")
-    domain_profile_label = Label(user_details_frame, text="Domeniul: " + logged_profile)
+    domain_profile_label = Label(user_details_frame, text="Domeniul: " + logged_profile, font=("Times New Roman", 11, "bold"))
     domain_profile_label.grid(row=7, column=0, padx=(40, 0), sticky="W")
-    specialization_profile_label = Label(user_details_frame, text="Specializarea: " + logged_specialization)
+    specialization_profile_label = Label(user_details_frame, text="Specializarea: " + logged_specialization, font=("Times New Roman", 11, "bold"))
     specialization_profile_label.grid(row=8, column=0, padx=(40, 0), sticky="W")
-    year_profile_label = Label(user_details_frame, text="Anul: " + logged_year)
+    year_profile_label = Label(user_details_frame, text="Anul: " + logged_year, font=("Times New Roman", 11, "bold"))
     year_profile_label.grid(row=9, column=0, padx=(40, 0), sticky="W")
 
-    browse_profile_label = Label(user_details_frame, text="Adaugă o noua fotografie: ")
-    browse_profile_label.grid(row=10, column=0, padx=(40, 0), sticky="W")
-    browse_profile_button = Button(user_details_frame, text="Răsfoiește", padx=177, command=browse_profile_picture)
-    browse_profile_button.grid(row=10, column=2, padx=(120, 0), sticky="E")
+    browse_profile_button = Button(user_details_frame, text="Adaugă o noua fotografie: ", padx=126, command=browse_profile_picture, font=("Times New Roman", 10, "bold"))
+    browse_profile_button.grid(row=10, column=2, padx=(0, 41), sticky="E")
 
     get_profile_picture_from_database()
 
     global edit_profile_button
-    edit_profile_button = Button(user_details_frame, text="Editează", padx=50, command=edit_user_profile)
-    edit_profile_button.grid(row=11, column=0, columnspan=2)
+    edit_profile_button = Button(user_details_frame, text="Editează", padx=100, command=edit_user_profile, font=("Times New Roman", 10, "bold"))
+    edit_profile_button.grid(row=11, column=0, columnspan=3, pady=(10,5))
 
 
 # Functia deschide fereastra Profilul meu si afiseaza datele corespunzatoare userului logat
@@ -1579,22 +1661,8 @@ def select_from_calendar(course_name, course_button):
     calendar_frame.config(text="Examen "+course_name)
 
     select_dateexam_button.config(state=NORMAL, command=select_exam_date)
-#
-#
-#
-#         conn = sqlite3.connect('users.db')
-#         cursor = conn.cursor()
-#
-#         sql_delete = "DELETE from restante WHERE user_id=?"
-#         cursor.execute(sql_delete, (logged_original_id,))
-#         for failed in commited_failed_exams:
-#             sql_insert = """INSERT INTO restante(user_id, materie, data) VALUES(?, ?, ?)"""
-#             com_insert =  logged_original_id, failed[0], failed[1]
-#             cursor.execute(sql_insert, com_insert)
-#
-#         conn.commit()
-#         conn.close()
-#         messagebox.showinfo('Info', "Restantele au fost salvate")
+
+
 def commit_exams_to_database():
     conn = sqlite3.connect('users.db')
     cursor = conn.cursor()
@@ -1778,11 +1846,11 @@ def show_exams():
     calendar_frame.pack(padx=30)
     calendar_object = Calendar(calendar_frame, font="Arial 14",date_pattern='dd/mm/yy', selectmode="day", year=date.today().year, month=date.today().month, day=date.today().day)
     calendar_object.grid(row=0, column=0, columnspan=2)
-    select_dateexam_button = Button(calendar_frame, text="Selectează", state=DISABLED, bd=1)
+    select_dateexam_button = Button(calendar_frame, text="Selectează", state=DISABLED, bd=1, font=("Times New Roman", 10, "bold"))
     select_dateexam_button.grid(row=1, column=0, columnspan=3)
 
 
-    commit_exams = Button(exams_window, text="Salvează", command=commit_exams_to_database, bd=1, padx=100)
+    commit_exams = Button(exams_window, text="Salvează", command=commit_exams_to_database, bd=1, padx=100, font=("Times New Roman", 10, "bold"))
     commit_exams.pack(pady=(20,0))
 
 
@@ -1801,7 +1869,8 @@ def get_course_semester(course):
 def check_program_availability(exams, faileds, semester):
     all_failed_dates = True
     all_exams_dates = True
-
+    print("lista examene check")
+    print(exams)
     for exam in exams:
         if exam[1] == "--/--/--":
             all_exams_dates = False
@@ -1864,6 +1933,16 @@ def check_exam_day(date):
         return exams
     else: return None
 
+def get_next_exams(date):
+    exams = []
+    for exam in exams_list:
+        if date.day > exam[1].day and date.month < exam[1].month or date.day < exam[1].day and date.month == exam[1].month:
+            exams.append(exam[0])
+        if len(exams) == 2:
+            return exams
+    return exams
+
+
 import random
 def recap_day(label):
     hobby_index = random.randint(0, 2)
@@ -1888,12 +1967,28 @@ def check_if_day_busy(date):
 
 def get_formulare(type):
     if type == "hobby":
-        forms = ["E timpul pentru", "E vremea pentru", "Ar merge niște", "Poate"]
-        rand = random.randint(0,3)
+        forms = ["E timpul pentru", "E vremea pentru", "Poate ai chef de"]
+        rand = random.randint(0,2)
         return forms[rand]
     if type == "invatat":
         forms = ["Aprofundare", "Laboratoare", "Seminarii", "Rezolvare modele examene"]
         rand = random.randint(0, 3)
+        return forms[rand]
+    if type == "trezire":
+        forms = ["Trezește-te la ora ", "Deșteptare la ora ", "Ora desteptătoare este ", "Ziua începe la ora "]
+        rand = random.randint(0,3)
+        return forms[rand]
+    if type ==  "treziremaxim":
+        forms = ["Trezește-te până în ora 10", "Poți dormi până la 10:30", "Deșteptarea la maxim 10", "Nu dormi mai mult de ora 10:30"]
+        rand = random.randint(0,3)
+        return forms[rand]
+    if type == "culcare":
+        forms = ["Mergi la somn înainte de ora ", "Culcă-te înainte de ora ", "Stingerea la ora ", "Nu depăși ora "]
+        rand = random.randint(0, 3)
+        return forms[rand]
+    if type == "culcaremaxim":
+        forms = ["Nu depăși ora de culcare 03:00", "Culcă-te înainte de ora 02:30"]
+        rand = random.randint(0, 1)
         return forms[rand]
 
 
@@ -1938,6 +2033,47 @@ def post_hobby(task_label):
                     posted = True
 
                     hobbies_posted += 1
+
+
+def post_hobby_semester(task_label):
+    global hobby_max_posted
+    global hobbies_posted
+    posted = False
+    number_of_tries = 0
+    while posted == False and hobbies_posted != hobby_max_posted:
+        list_index = random.randint(1, 5)
+        if list_index == 1:
+            operate_list = frar
+        if list_index == 2:
+            operate_list = rar
+        if list_index == 3:
+            operate_list = uneori
+        if list_index == 4:
+            operate_list = des
+        if list_index == 5:
+            operate_list = fdes
+        if len(operate_list) != 0:
+            hobby_index = random.randint(0, (len(operate_list)-1))
+            if operate_list[hobby_index][1] < operate_list[hobby_index][2]:
+                formulare = get_formulare("hobby")
+                hobby_label = Label(task_label, text=formulare +" "+ operate_list[hobby_index][0].capitalize())
+                hobby_label.pack()
+                if list_index == 1:
+                    frar[hobby_index][1] += 1
+                if list_index == 2:
+                    rar[hobby_index][1] += 1
+                if list_index == 3:
+                    uneori[hobby_index][1] += 1
+                if list_index == 4:
+                    des[hobby_index][1] += 1
+                if list_index == 5:
+                    fdes[hobby_index][1] += 1
+                posted = True
+
+                hobbies_posted += 1
+        if number_of_tries == 3:
+            return
+        number_of_tries += 1
 
 
 def post_hobby_free(task_label):
@@ -1998,10 +2134,12 @@ def show_session_program():
             failed_list.pop(useless)
 
     program_availability = check_program_availability(exams_list, failed_list, current_semester)
-
+    print(program_availability)
     if program_availability == False:
         messagebox.showinfo("Program sesiune!", "Pentru a accesa această funcționalitate trebuie să: \n -> introduceți toate datele examenelor, \n -> introduceți toate datele restanțelor semestrului curent, \n -> introduceți ocupațiile preferate.")
     else:
+        print("listă examene: ")
+        print(exams_list)
         for exam in exams_list:
             date_str = exam[1]
             date_time_obj = datetime.strptime(date_str, '%d/%m/%y')
@@ -2046,7 +2184,6 @@ def show_session_program():
 
         session_schedule_frame = LabelFrame(session_program_window)
         session_schedule_frame.pack(fill="both")
-        # Lista de liste cu hobby si frecventa
 
         session_days_frame = LabelFrame(session_schedule_frame, bd=0)
         session_days_frame.pack()
@@ -2081,7 +2218,7 @@ def show_session_program():
             if exam != None:
                 day_frame.config(fg="red")
                 for lilexam in exam:
-                    label = Label(day_tasks_label, text=lilexam)
+                    label = Label(day_tasks_label, text="Examen la " + lilexam, font=("Times new Roman", 10, "bold"))
                     label.pack()
                 exams_day_session.append(day_frame)
 
@@ -2135,6 +2272,12 @@ def show_session_program():
                 number_of_tasks += 1
             if number_of_tasks == 0:
                 post_hobby_free(task_label)
+            if number_of_tasks < 2:
+                next_two_exams = get_next_exams(dates[days_of_session.index(day)])
+                exam_index = random.randint(0, 1)
+                label_text = Label(task_label, text="Invață la " + next_two_exams[exam_index])
+                label_text.pack()
+
 
 
 def check_program_semester_availability(monday_courses, tuesday_courses, wednesday_courses, thursday_courses, friday_courses):
@@ -2149,7 +2292,6 @@ def check_program_semester_availability(monday_courses, tuesday_courses, wednesd
 
 
 def select_courses_for_semester_program(day):
-    print("orele de "+day+" sunt ")
     conn = sqlite3.connect('users.db')
     cursor = conn.cursor()
     sql_query = "SELECT tip_curs, nume_curs, ora_inceput, ora_sfarsit FROM oredecurs WHERE id_user=? and zi = ?"
@@ -2162,6 +2304,37 @@ def select_courses_for_semester_program(day):
     return courses_of_day
     conn.close()
 
+
+def get_wakeup_hour(day_courses):
+    if day_courses != []:
+        return str(day_courses[0][2] - 2)
+    else: return None
+
+
+def get_sleep_hour(tomorrow_courses):
+    if tomorrow_courses != []:
+        if tomorrow_courses[0][2] == 8:
+            return "22:30"
+        if tomorrow_courses[0][2] == 9:
+            return "23:00"
+        if tomorrow_courses[0][2] == 10:
+            return "23:30"
+        if tomorrow_courses[0][2] == 11:
+            return "00:30"
+        if tomorrow_courses[0][2] >= 12:
+            return None
+    else:
+        return None
+
+
+def post_study(courses, task):
+    if courses != []:
+        course_index = random.randint(0, len(courses)-1)
+        label_text = Label(task, text="Invață la "+ courses[course_index][1])
+        label_text.pack()
+
+
+
 def show_semester_program():
     monday_courses = select_courses_for_semester_program("luni")
     tuesday_courses = select_courses_for_semester_program("marti")
@@ -2173,10 +2346,227 @@ def show_semester_program():
 
     if program_availability == False:
         messagebox.showinfo("Program semestru!",
-                            "Pentru a accesa această funcționalitate trebuie să: \n -> introduceți orarul săptămânal: nu puteți avea în total mai puțin de 6 ore de curs sau mai mult de 18 \n -> introduceți ocupațiile preferate.")
+                            "Pentru a accesa această funcționalitate trebuie să: \n -> introduceți orarul săptămânal: numărul orelor de curs nu poate fi mai mic de 6 sau mai mare de 18 \n -> introduceți ocupațiile preferate.")
     else:
-        print("ok")
+        global semester_program_window
+        semester_program_window = Toplevel()
+        semester_program_window.title("Program săptămânal")
 
+        semester_program_welcome = Label(semester_program_window,
+                                        text="Programul tău săptămânal, semestrul "+str(get_current_semester()),
+                                        font=("Times New Roman", 17, "italic"), fg="#0099cc")
+        semester_program_welcome.pack(pady=(10, 20))
+
+        schedule_button_menu.config(state=DISABLED)
+        semester_program_window.protocol("WM_DELETE_WINDOW",
+                                        lambda: buttons_available(semester_program_window, schedule_button_menu))
+
+        semester_schedule_frame = LabelFrame(semester_program_window)
+        semester_schedule_frame.pack(fill="both")
+
+        global hobbies_posted
+        hobbies_posted = 0
+
+        global hobbies_list
+        hobbies_list = get_hobbies_list_from_database()
+        hobbies_list = sorted(hobbies_list, key=lambda x: x[1])
+        initialize_hobbies_lists(21)
+
+        monday_label = Label(semester_schedule_frame, text="Luni", font=("Times New Roman", 17, "underline italic"), fg="#0099cc")
+        monday_label.grid(row=0, column=0)
+        tuesday_label = Label(semester_schedule_frame, text="Marți", font=("Times New Roman", 17, "underline italic"), fg="#0099cc")
+        tuesday_label.grid(row=0, column=1)
+        wednesday_label = Label(semester_schedule_frame, text="Miercuri", font=("Times New Roman", 17, "underline italic"), fg="#0099cc")
+        wednesday_label.grid(row=0, column=2)
+        thursday_label = Label(semester_schedule_frame, text="Joi", font=("Times New Roman", 17, "underline italic"), fg="#0099cc")
+        thursday_label.grid(row=0, column=3)
+        friday_label = Label(semester_schedule_frame, text="Vineri", font=("Times New Roman", 17, "underline italic"), fg="#0099cc")
+        friday_label.grid(row=0, column=4)
+        saturday_label = Label(semester_schedule_frame, text="Sâmbătă", font=("Times New Roman", 17, "underline italic"), fg="#0099cc")
+        saturday_label.grid(row=0, column=5)
+        sunday_label = Label(semester_schedule_frame, text="Duminică", font=("Times New Roman", 17, "underline italic"), fg="#0099cc")
+        sunday_label.grid(row=0, column=6)
+
+        day_index = 0
+        linie = 1
+        col = 0
+        days_of_program = []
+        tasks = []
+        while day_index < 21:
+            day_frame = LabelFrame(semester_schedule_frame)
+            day_frame.grid(row=linie, column=col, padx=20, pady=30)
+
+            days_of_program.append(day_frame)
+
+            day_tasks_label = Label(day_frame, width=31, height=10)
+            day_tasks_label.pack()
+            day_tasks_label.pack_propagate(False)
+            tasks.append(day_tasks_label)
+
+            col += 1
+            if col == 7:
+                linie += 1
+                col =0
+            day_index += 1
+
+        wakeup_monday = get_wakeup_hour(monday_courses)
+        wakeup_tuesday = get_wakeup_hour(tuesday_courses)
+        wakeup_wednesday = get_wakeup_hour(wednesday_courses)
+        wakeup_thursday = get_wakeup_hour(thursday_courses)
+        wakeup_friday = get_wakeup_hour(friday_courses)
+
+        sleep_monday = get_sleep_hour(tuesday_courses)
+        sleep_tuesday = get_sleep_hour(wednesday_courses)
+        sleep_wednesday = get_sleep_hour(thursday_courses)
+        sleep_thursday = get_sleep_hour(friday_courses)
+        sleep_sunday = get_sleep_hour(monday_courses)
+
+        wakeup = None
+        for day in days_of_program:
+            if days_of_program.index(day) == 0 or days_of_program.index(day) == 7 or days_of_program.index(day) == 14:
+                wakeup = wakeup_monday
+                courses = monday_courses
+                next_courses = tuesday_courses
+                next_courses2 = wednesday_courses
+                sleep = sleep_monday
+            if days_of_program.index(day) == 1 or days_of_program.index(day) == 8 or days_of_program.index(day) == 15:
+                wakeup = wakeup_tuesday
+                courses = tuesday_courses
+                next_courses = wednesday_courses
+                next_courses2 = thursday_courses
+                sleep = sleep_tuesday
+            if days_of_program.index(day) == 2 or days_of_program.index(day) == 9 or days_of_program.index(day) == 16:
+                wakeup = wakeup_wednesday
+                courses = wednesday_courses
+                next_courses = thursday_courses
+                next_courses2 = friday_courses
+                sleep = sleep_wednesday
+            if days_of_program.index(day) == 3 or days_of_program.index(day) == 10 or days_of_program.index(day) == 17:
+                wakeup = wakeup_thursday
+                courses = thursday_courses
+                next_courses = friday_courses
+                next_courses2 = monday_courses
+                sleep = sleep_thursday
+            if days_of_program.index(day) == 4 or days_of_program.index(day) == 11 or days_of_program.index(day) == 18:
+                wakeup = wakeup_friday
+                courses = friday_courses
+                next_courses = monday_courses
+                next_courses2 = tuesday_courses
+            if days_of_program.index(day) == 6 or days_of_program.index(day) == 13 or days_of_program.index(day) == 20:
+                sleep = sleep_sunday
+                next_courses = thursday_courses
+                next_courses2 = wednesday_courses
+
+            if wakeup != None and int(wakeup) < 11:
+                wakeup_label = Label(tasks[days_of_program.index(day)], text=get_formulare("trezire") + wakeup)
+                wakeup_label.pack()
+            else:
+                wakeup_label = Label(tasks[days_of_program.index(day)], text=get_formulare("treziremaxim"))
+                wakeup_label.pack()
+
+            for course in courses:
+                course_label = Label(tasks[days_of_program.index(day)], text=str(course[2]) + " <-> " + str(course[3]) + " - " + course[0] + " - " +course[1])
+                course_label.pack()
+
+            if days_of_program.index(day) == 5 or days_of_program.index(day) == 12 or days_of_program.index(day) == 19:
+                if len(monday_courses) >= 0:
+                    post_study(monday_courses, tasks[days_of_program.index(day)])
+
+            if len(courses) <= 2 and (days_of_program.index(day) != 5 and days_of_program.index(day) != 12 and days_of_program.index(day) != 19):
+                next_index = random.randint(0, 1)
+                if next_index == 0:
+                    post_study(next_courses, tasks[days_of_program.index(day)])
+                else:
+                    post_study(next_courses2, tasks[days_of_program.index(day)])
+
+            number_of_tasks = 0
+            for task in tasks[days_of_program.index(day)].winfo_children():
+                number_of_tasks += 1
+
+            if number_of_tasks < 4:
+                post_hobby_semester(tasks[days_of_program.index(day)])
+            print(hobbies_posted)
+            if sleep != None:
+                sleep_label = Label(tasks[days_of_program.index(day)], text=get_formulare("culcare") + sleep)
+                sleep_label.pack()
+            else:
+                sleep_label = Label(tasks[days_of_program.index(day)], text=get_formulare("culcaremaxim"))
+                sleep_label.pack()
+            sleep = None
+            wakeup = None
+            courses = []
+
+
+
+def show_response(index, responses, questions):
+    for child in responses_frame.winfo_children():
+        child.destroy()
+
+    question = Label(responses_frame, text=questions[index], font=("Times New Roman", 14, "italic"), fg="#0099cc")
+    question.pack(pady=(5, 11))
+
+    response = Label(responses_frame, text=responses[index], font=("Times New Roman", 13))
+    response.pack()
+
+def show_faq():
+    global faq_window
+    faq_window = Toplevel()
+    faq_window.title("Notificări")
+
+    faq_button_menu.config(state=DISABLED)
+    faq_window.protocol("WM_DELETE_WINDOW", lambda: buttons_available(faq_window, faq_button_menu))
+
+    faq_welcome = Label(faq_window, text="Frequently Asked Questions",  font=("Times New Roman", 18, "italic"), fg="#0099cc")
+    faq_welcome.pack(side=TOP, pady=(10, 35))
+
+    questions_frame = LabelFrame(faq_window, bd=1, width=400, height = 470, pady=10)
+    questions_frame.pack(side=LEFT)
+    questions_frame.pack_propagate(FALSE)
+
+    global responses_frame
+    responses_frame = LabelFrame(faq_window, bd=1, width=550, height = 470, pady=10)
+    responses_frame.pack(side=RIGHT)
+    responses_frame.pack_propagate(FALSE)
+
+    questions = ["Cum introduc ocupațiile?",
+                 "De ce nu pot accesa programul pentru sesiune?",
+                 "De ce nu pot accesa programul pentru semestre?",
+                 "Cum introduc datele examenelor?",
+                 "Cum introduc orarul meu?",
+                 "Care este scopul carnetului de note?",
+
+                 "Cum pot reseta username-ul sau parola?",
+                 "Parola mea este in siguranță?",
+
+                 "Introducerea datelor",
+                 "Setarea avatarului",
+                 ]
+
+    responses = ["Pentru a introduce ocupațiile trebuie să accesați butonul „Hobbies”. \n Apăsați butonul „Editează”. \n Acum aveți două modalități de introducere: \n\n - Selectarea ocupațiilor din lista standard: \n1. Selectați imaginile ocupațiilor din listă, \n 2. Apăsați „Continuare”, \n 3. Introduceti frecvența, \n \n- Introducerea ocupațiilor de la tastatură: \n 1. Introduceți numele ocupației, \n 2. Introduceți frecvența de practicare a acesteia, \n 3. Apăsați butonul ”Introdu”, \n 4. Apăsați „Continuare”. \n\n  Ați reușit să introduceți pasiunile preferate!",
+                 "Pentru a accesa programul de sesiune, aplicația necesită următoarele: \n 1. Toate datele examinelor \n 2. Toate datele restanțelor aferente semestrului curent \n 3. Patru ocupații preferate \n \n Introducerea datelor de la 1) și 2) se realizează accesând „Examene”. \n Introducerea ocupațiilor se realizează accesând „Hobbies”. ",
+                 "Pentru a accesa programul pentru semestre, aplicația necesită următoarele:  \n 1. Orarul săptămânal al studentului. \n Numărul orelor de curs dintr-o săptămână trebuie să fie: \n - mai mare de 6, \n - mai mic de 18. \n 2. Patru ocupații preferate. \n \n Introducerea orarului se realizează accesând „Orar”. \n Introducerea ocupațiilor se realizează accesând „Hobbies”.",
+                 "Datele examenelor sunt introduse cu ajutorul butonlui „Examene”: \n 1. Apăsați pe data aferentă examenului sau restanței, \n 2. Selectați data din calendar, \n 3. Apăsați butonul „Selectează” \n \n Acum data examenului a fost actualizată!",
+                 "Orarul poate fi vizualizat și editat cu ajutorul butonului „Orar”. \n Pentru editarea orelor dintr-o zi: \n 1. Apasă pe numele zilei a căror ore vrei să le modifici, \n2. Introdu numărul orelor de curs, 3. Apasă „Introdu în orar,” \n 4. Selectează tipul, materia și intervalul orar pentru fiecare oră de curs. \n 5. Apasă butonul „Salvează”. \n \n Acum orele din ziua aferentă au fost modificate!",
+                 "După ce ai accesat butonul „Carnet”: \n 1. Selectează notele dorite la materiile aferente \n 2. Apasă butonul „Salvează” \n \n Scopul carnetului de note este de a reține notele finale \n obținute la fiecare materie în parte. ",
+
+                 "Resetarea datelor studentului se realizează accesând „Profil”.\n 1. Apăsați butonul „Editează”, \n 2. Introdu parola actuală, \n 3. Apasă butonul „Confrimă”, \n 4. Accesează „Schimbare parolă” sau „Schimbare username”, \n 5. Introdu noile date, \n 6. Introdu noile date, \n 7. Apasă butonul „Salvează”. \n\n Datele au fost modificate!",
+                 "În primul rând, pentru securitatea parolei, avem nevoie de ajutorul \n dumneavoastră. Vă rugăm să nu distribuiți niciodată parola contului. \n Administratorul aplicației nu va cere să transmiteți parola contului. \n Pe de altă parte, aplicația memorează parolele utilizatorilor \n sub formă criptată. Metoda folosită la criptare este foarte puternică\n fiind o metodă specială pentru criptarea parolelor. \n \n Împreună putem ține contul în siguranță!",
+
+                 "Introducerea datelor de intrare corecte joacă un rol \n foarte important în folosirea corectă a aplicației! \n În cazul de introducere a datelor „dummy”, \n aplicația nu va debloca anumite funcționalități. \n \nIntroducerea datelor reale duce la obținerea rezultatelor așteptate.",
+                 "Aplicația permite introducerea unui avatar specific. \n Pentru a accesa aceasta funcționalitate, apăsați butonul „Profil”. \n Apăsați butonul „Răsfoiește”. \n Selectați poza dorită. \n Apăsați butonul „Save”. \n \n În cazul în care poza nu apare în fereastra de selectare, \n selectați tipul imaginii în partea din dreapta jos. \n\n Ați introdus avatarul contului dumneavoastră."]
+
+    for question in questions:
+        if questions.index(question) == 0:
+            category_name = Label(questions_frame, text= "Cum să .. ?", font=("Times New Roman", 15, "underline italic"), fg="#0099cc",)
+            category_name.pack(anchor=W, padx=15)
+        if questions.index(question) == 6:
+            category_name = Label(questions_frame, text="Securitate", font=("Times New Roman", 15, "underline italic"), fg="#0099cc",)
+            category_name.pack(anchor=W, padx=15)
+        if questions.index(question) == 8:
+            category_name = Label(questions_frame, text="Tips and Tricks", font=("Times New Roman", 15, "underline italic"), fg="#0099cc",)
+            category_name.pack(anchor=W, padx=15)
+        question_1 = Button(questions_frame, text=str(questions.index(question)+1) + ". " +  questions[questions.index(question)], font=("Times New Roman", 13), bd=0, command=lambda index=questions.index(question): show_response(index, responses, questions))
+        question_1.pack(anchor=W, padx=15)
 
 
 def post_top_bar_frame():
@@ -2192,13 +2582,31 @@ def post_top_bar_frame():
 
     welcome_text_label = Label(top_background_label, text="Salut, " + logged_first_name + "!", bg="white",  font=("Times New Roman", 16, "italic"), fg="#0099cc")
     welcome_text_label.pack(side=LEFT, padx=(10,0))
-    logout_button = Button(top_background_label, text="Deconectare", command=logout_function)
+
+    logout_image = Image.open("C:/Users/lenovo/PycharmProjects/LicentaSasu/images/menuicons/logout.png")
+    logout_image = logout_image.resize((30, 30), Image.ANTIALIAS)
+    logout_icon = ImageTk.PhotoImage(logout_image)
+    logout_button = Button(top_background_label, relief=FLAT, image=logout_icon, compound=LEFT, text="Deconectare", font=("Times New Roman", 11, "italic bold"), bg="#78BFD8", activebackground='#78BFD8', command=logout_function)
+    logout_button.image = logout_icon
     logout_button.pack(side=RIGHT)
-    faq_button = Button(top_background_label, text="FAQ")
-    faq_button.pack(side=RIGHT, padx=(0,5))
 
 
-# Functia afiseaza logged_in_frame, ceea ce vede un utilizator dupa ce s-a logat cu succes.
+class HoverButton(Button):
+    def __init__(self, master, **kw):
+        Button.__init__(self,master=master,**kw)
+        self.defaultBackground = self["background"]
+        self.bind("<Enter>", self.on_enter)
+        self.bind("<Leave>", self.on_leave)
+
+    def on_enter(self, e):
+        self['relief'] = GROOVE
+        self['font'] = ("Times New Roman", 12, "underline italic bold")
+
+    def on_leave(self, e):
+        self['relief'] = FLAT
+        self['font'] = ("Times New Roman", 12, "italic bold")
+
+
 def logged_in_function():
     global logged_in_frame
     logged_in_frame = LabelFrame(root,  width=1000, height=700, bd=0)
@@ -2229,25 +2637,71 @@ def logged_in_function():
     global session_button_menu
     global reportcard_button_menu
     global exams_button_menu
-    global notifications_button_menu
-    profile_button_menu = Button(menu_frame, text="Profil", pady=83, padx=110, bd=0, command=show_user_profile)
-    profile_button_menu.grid(row=0, column=0 , sticky="ew")
-    courses_button_menu = Button(menu_frame, text="Materii", pady=83, padx=110, bd=0, command=show_current_courses)
-    courses_button_menu.grid(row=0, column=1, sticky="ew", padx=10)
-    timetable_button_menu = Button(menu_frame, text="Orar", pady=83, padx=110, bd=0, command=show_timetable)
-    timetable_button_menu.grid(row=0, column=2, sticky="ew")
-    hobbies_button_menu = Button(menu_frame, text="Hobbies", pady=83, padx=110, bd=0, command=show_users_hobbies)
-    hobbies_button_menu.grid(row=1, column=0, sticky="ew", pady=10)
-    schedule_button_menu = Button(menu_frame, text="Program", pady=83, padx=110, bd=0, command=show_semester_program)
-    schedule_button_menu.grid(row=1, column=1, sticky="ew", padx=10, pady=10)
-    session_button_menu = Button(menu_frame, text="Sesiune", pady=81, padx=90, bd=0, command=show_session_program)
-    session_button_menu.grid(row=1, column=2, sticky="ew", pady=10)
-    reportcard_button_menu = Button(menu_frame, text="Carnet", pady=83, padx=110, bd=0, command=show_report_card)
-    reportcard_button_menu.grid(row=2, column=0 , sticky="ew")
-    exams_button_menu = Button(menu_frame, text="Examene", pady=83, padx=110, bd=0, command=show_exams)
-    exams_button_menu.grid(row=2, column=1, sticky="ew", padx=10)
-    notifications_button_menu = Button(menu_frame, text="Notificari", pady=83, padx=110, bd=0)
-    notifications_button_menu.grid(row=2, column=2, sticky="ew")
+    global faq_button_menu
+
+    profile_image = Image.open("C:/Users/lenovo/PycharmProjects/LicentaSasu/images/menuicons/profil2.png")
+    profile_image = profile_image.resize((30,30),Image.ANTIALIAS)
+    profile_icon = ImageTk.PhotoImage(profile_image)
+    profile_button_menu = HoverButton(menu_frame, width= 270 , height= 180, relief = FLAT, image=profile_icon, compound=LEFT, text="Profil", font=("Times New Roman", 12, "italic bold"), bg="#99d9ea", activebackground='#99d9ea', command=show_user_profile)
+    profile_button_menu.image = profile_icon
+    profile_button_menu.grid(row=0, column=0)
+
+    courses_image = Image.open("C:/Users/lenovo/PycharmProjects/LicentaSasu/images/menuicons/materii.png")
+    courses_image = courses_image.resize((30, 30), Image.ANTIALIAS)
+    courses_icon = ImageTk.PhotoImage(courses_image)
+    courses_button_menu = HoverButton(menu_frame, width= 270, height= 180, relief = FLAT, image=courses_icon, compound=LEFT, text="Materii", font=("Times New Roman", 12, "italic bold"), bg="#99d9ea", activebackground='#99d9ea', command=show_current_courses)
+    courses_button_menu.image = courses_icon
+    courses_button_menu.grid(row=0, column=1, padx=10)
+
+    timetable_image = Image.open("C:/Users/lenovo/PycharmProjects/LicentaSasu/images/menuicons/orar.png")
+    timetable_image = timetable_image.resize((30, 30), Image.ANTIALIAS)
+    timetable_icon = ImageTk.PhotoImage(timetable_image)
+    timetable_button_menu = HoverButton(menu_frame, width= 270 , height= 180,  relief = FLAT, image = timetable_icon, compound=LEFT, text="Orar", font=("Times New Roman", 12, "italic bold"), bg="#99d9ea", activebackground='#99d9ea', command=show_timetable)
+    timetable_button_menu.image = timetable_icon
+    timetable_button_menu.grid(row=0, column=2)
+
+    hobby_image = Image.open("C:/Users/lenovo/PycharmProjects/LicentaSasu/images/menuicons/hobby.png")
+    hobby_image = hobby_image.resize((30, 30), Image.ANTIALIAS)
+    hobby_icon = ImageTk.PhotoImage(hobby_image)
+    hobbies_button_menu =  HoverButton(menu_frame, width= 270 , height= 180, relief = FLAT, image=hobby_icon, compound=LEFT, text="Hobbies", font=("Times New Roman", 12, "italic bold"), bg="#99d9ea", activebackground='#99d9ea', command=show_users_hobbies)
+    hobbies_button_menu.image = hobby_icon
+    hobbies_button_menu.grid(row=1, column=0, pady=10)
+
+
+    schedule_image = Image.open("C:/Users/lenovo/PycharmProjects/LicentaSasu/images/menuicons/program.png")
+    schedule_image = schedule_image.resize((30, 30), Image.ANTIALIAS)
+    schedule_icon = ImageTk.PhotoImage(schedule_image)
+    schedule_button_menu = HoverButton(menu_frame, width= 270 , height= 180, relief = FLAT, image=schedule_icon, compound=LEFT, text="Program", font=("Times New Roman", 12, "italic bold"), bg="#99d9ea", activebackground='#99d9ea', command=show_semester_program)
+    schedule_button_menu.image = schedule_icon
+    schedule_button_menu.grid(row=1, column=1, padx=10, pady=10)
+
+    session_image = Image.open("C:/Users/lenovo/PycharmProjects/LicentaSasu/images/menuicons/sesiune.png")
+    session_image = session_image.resize((30, 30), Image.ANTIALIAS)
+    session_icon = ImageTk.PhotoImage(session_image)
+    session_button_menu = HoverButton(menu_frame, width=270, height=180, relief = FLAT, image=session_icon, compound=LEFT, text="Sesiune", font=("Times New Roman", 12, "italic bold"), bg="#99d9ea", activebackground='#99d9ea', command=show_session_program)
+    session_button_menu.image = session_icon
+    session_button_menu.grid(row=1, column=2, pady=10)
+
+    reportcard_image = Image.open("C:/Users/lenovo/PycharmProjects/LicentaSasu/images/menuicons/carnet.png")
+    reportcard_image = reportcard_image.resize((30, 30), Image.ANTIALIAS)
+    reportcard_icon = ImageTk.PhotoImage(reportcard_image)
+    reportcard_button_menu = HoverButton(menu_frame, width=270, height=180, relief = FLAT, image=reportcard_icon, compound=LEFT, text="Carnet", font=("Times New Roman", 12, "italic bold"), bg="#99d9ea", activebackground='#99d9ea', command=show_report_card)
+    reportcard_button_menu.image = reportcard_icon
+    reportcard_button_menu.grid(row=2, column=0)
+
+    exams_image = Image.open("C:/Users/lenovo/PycharmProjects/LicentaSasu/images/menuicons/examene.png")
+    exams_image = exams_image.resize((30, 30), Image.ANTIALIAS)
+    exams_icon = ImageTk.PhotoImage(exams_image)
+    exams_button_menu = HoverButton(menu_frame, width=270, height=180,relief = FLAT, image=exams_icon, compound=LEFT, text="Examene", font=("Times New Roman", 12, "italic bold"), bg="#99d9ea", activebackground='#99d9ea',  command=show_exams)
+    exams_button_menu.image = exams_icon
+    exams_button_menu.grid(row=2, column=1, padx=10)
+
+    faq_image = Image.open("C:/Users/lenovo/PycharmProjects/LicentaSasu/images/menuicons/faq.png")
+    faq_image = faq_image.resize((30, 30), Image.ANTIALIAS)
+    faq_icon = ImageTk.PhotoImage(faq_image)
+    faq_button_menu = HoverButton(menu_frame, width=270, height=180, relief = FLAT, image=faq_icon, compound=LEFT, text="FAQ", font=("Times New Roman", 12, "italic bold"), bg="#99d9ea", activebackground='#99d9ea',command=show_faq)
+    faq_button_menu.image = faq_icon
+    faq_button_menu.grid(row=2, column=2)
 
 
 def modified(event):
